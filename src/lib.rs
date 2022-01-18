@@ -5,9 +5,12 @@ mod input;
 mod window;
 
 #[no_mangle]
-pub unsafe extern "C" fn get_entropy(size: u32, array_pointer: *const u8) -> f64 {
-    window::test();
+pub extern "C" fn test_window(a: u8, b: u8) {
+    window::test(a, b);
+}
 
+#[no_mangle]
+pub unsafe extern "C" fn get_entropy(size: u32, array_pointer: *const u8) -> f64 {
     let data = std::slice::from_raw_parts(array_pointer, size as usize);
     let mut entropy = 0.0;
     let mut counts = [0; 256];
