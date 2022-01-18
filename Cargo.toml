@@ -1,0 +1,16 @@
+[package]
+name = "roux"
+version = "0.1.0"
+edition = "2021"
+authors = [
+  "bradmartin333"
+]
+
+[lib]
+name="roux"
+crate-type = ["dylib"]
+
+[features]
+
+[dependencies]
+glium = "0.31.0"
