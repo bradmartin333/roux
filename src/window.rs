@@ -10,6 +10,10 @@ pub fn test(
     start_pos_x: i32,
     start_pos_y: i32,
 ) {
+    let brush_size: i32 = 10;
+    let mut canvas_data = vec![0; data.len()];
+    canvas_data.clone_from_slice(data);
+
     let canvas = Canvas::new(wid as usize, hgt as usize, start_pos_x, start_pos_y)
         .title("Roux Viewer")
         .state(KeyboardMouseStates::new())
@@ -23,11 +27,36 @@ pub fn test(
                 let dx = x as i32 - state.x;
                 let dy = y as i32 - state.y;
                 let dist = dx * dx + dy * dy;
-                let lux = data[(height - y) * width + x];
+                if state.received_mouse_press && !state.mouse_clicked {
+                    for i in (brush_size / -2)..(brush_size / 2) {
+                        for j in 0..brush_size {
+                            canvas_data[(height - state.y as usize + j as usize) * width
+                                + i as usize
+                                + state.x as usize] = 255;
+                        }
+                    }
+                }
+                let lux = canvas_data[(height - y) * width + x];
                 *pixel = Color {
                     r: lux,
-                    g: if dist < 128 * 128 { dy as u8 } else { lux },
-                    b: if dist < 128 * 128 { dx as u8 } else { lux },
+                    g: if dist < 128 * 128 {
+                        dy as u8
+                    } else {
+                        if lux == 255 {
+                            0
+                        } else {
+                            lux
+                        }
+                    },
+                    b: if dist < 128 * 128 {
+                        dx as u8
+                    } else {
+                        if lux == 255 {
+                            0
+                        } else {
+                            lux
+                        }
+                    },
                 };
             }
         }

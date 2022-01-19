@@ -174,13 +174,15 @@ where
                 self.info.width as f64,
                 self.info.height as f64,
             ))
-            .with_resizable(true)
+            .with_resizable(false)
             .with_position(glutin::dpi::PhysicalPosition::new(
                 self.info.start_pos_x,
                 self.info.start_pos_y,
             ));
         let cb = glutin::ContextBuilder::new().with_vsync(true);
         let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+
+        display.gl_window().window().set_cursor_visible(false);
 
         self.info.dpi = if self.info.hidpi {
             display.gl_window().window().scale_factor()
