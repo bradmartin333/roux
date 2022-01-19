@@ -19,7 +19,7 @@ namespace RouxForms
         {
             if (radioButton1.Checked)
             {
-                int clicks = test_window(0, 255);
+                uint clicks = test_window(0, 255);
                 System.Diagnostics.Debug.WriteLine(clicks);
             }
         }

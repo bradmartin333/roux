@@ -6,7 +6,7 @@ namespace RouxForms
     public class Functions
     {
         [DllImport("roux.dll")]
-        public static extern int test_window(uint a, uint b);
+        public static extern uint test_window(uint a, uint b);
 
         [DllImport("roux.dll")]
         unsafe private static extern double get_entropy(uint len, byte* ptr);

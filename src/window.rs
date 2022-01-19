@@ -2,7 +2,7 @@ use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::input::KeyboardMouseStates;
 
-pub fn test(a: u8, b: u8, pointer: *mut i32) {
+pub fn test(a: u8, b: u8, pointer: *mut u32) {
     let canvas = Canvas::new(500, 500)
         .title("Roux Viewer")
         .state(KeyboardMouseStates::new())
