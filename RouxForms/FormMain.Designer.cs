@@ -33,6 +33,8 @@
             this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
+            this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // radioButton1
@@ -89,13 +91,37 @@
             this.button2.TabIndex = 4;
             this.button2.Text = "Test Window";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.Click += new System.EventHandler(this.Button2_Click);
+            // 
+            // radioButton3
+            // 
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Location = new System.Drawing.Point(14, 65);
+            this.radioButton3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(56, 19);
+            this.radioButton3.TabIndex = 5;
+            this.radioButton3.Text = "Tower";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            // 
+            // radioButton4
+            // 
+            this.radioButton4.AutoSize = true;
+            this.radioButton4.Location = new System.Drawing.Point(14, 90);
+            this.radioButton4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.radioButton4.Name = "radioButton4";
+            this.radioButton4.Size = new System.Drawing.Size(42, 19);
+            this.radioButton4.TabIndex = 6;
+            this.radioButton4.Text = "Tall";
+            this.radioButton4.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(298, 79);
+            this.ClientSize = new System.Drawing.Size(298, 125);
+            this.Controls.Add(this.radioButton4);
+            this.Controls.Add(this.radioButton3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button1);
@@ -116,6 +142,8 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
         private Button button2;
+        private RadioButton radioButton3;
+        private RadioButton radioButton4;
     }
 }
 

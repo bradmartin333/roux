@@ -14,11 +14,9 @@ pub unsafe extern "C" fn test_window(
     y: i32,
 ) -> u32 {
     let data = std::slice::from_raw_parts(array_pointer, size as usize);
-    let zero: Box<u32> = Box::new(0);
-    let pointer = Box::into_raw(zero);
-    window::test(pointer, data, wid, hgt, x, y);
-    let num_clicks = Box::from_raw(pointer);
-    *num_clicks
+    let mut num_clicks: u32 = 0;
+    window::test(&mut num_clicks, data, wid, hgt, x, y);
+    num_clicks
 }
 
 #[no_mangle]

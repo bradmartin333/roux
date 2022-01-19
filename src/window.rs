@@ -3,7 +3,7 @@ use crate::color::Color;
 use crate::input::KeyboardMouseStates;
 
 pub fn test(
-    pointer: *mut u32,
+    num_clicks: *mut u32,
     data: &'static [u8],
     wid: i32,
     hgt: i32,
@@ -63,7 +63,7 @@ pub fn test(
 
         if state.received_mouse_press && !state.mouse_clicked {
             unsafe {
-                *pointer += 1;
+                *num_clicks += 1;
             }
             state.mouse_clicked = true;
         }

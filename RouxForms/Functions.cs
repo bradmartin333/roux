@@ -6,28 +6,30 @@ namespace RouxForms
     public class Functions
     {
         [DllImport("roux.dll")]
-        unsafe public static extern uint test_window(uint len, byte* ptr, int wid, int hgt, int x, int y);
+        unsafe private static extern uint test_window(uint len, byte* ptr, int wid, int hgt, int x, int y);
 
-        unsafe public static uint TestWindow(Bitmap bmp, double size, Point center)
+        unsafe public static uint TestWindow(Bitmap bmp, SizeF size)
         {
             // Predict size after red channel extraction
             Size bmpSize = bmp.Width % 12 == 0 ? bmp.Size : new Size(bmp.Width / 12 * 12, bmp.Height);
 
-            // How much to shrink the image by to fit in a large window
-            double scale = Math.Max(bmpSize.Width, bmpSize.Height) / size;
-
-            // Clone bitmap and scale down
-            bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)(bmpSize.Width / scale), (int)(bmpSize.Height / scale)));
+            // Resize bitmap to fit a single screen
+            if (bmpSize.Width <= bmpSize.Height)
+                if (bmpSize.Height < size.Height)
+                    bmp = new Bitmap((Bitmap)bmp.Clone());
+                else
+                    bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)(bmpSize.Width / (bmpSize.Height / size.Height)), (int)size.Height));
+            else
+                if (bmpSize.Width < size.Width)
+                    bmp = new Bitmap((Bitmap)bmp.Clone());
+                else
+                    bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)size.Width, (int)(bmpSize.Height / (bmpSize.Width / size.Width))));
 
             // Extract red channel and resize to the predicted size
             byte[] data = GetRedChannelArr(ref bmp);
 
             // Send red channel data and image size info
-            fixed (byte* p = &data[0])
-                return test_window(
-                    (uint)data.Length, p, 
-                    bmp.Width, bmp.Height, 
-                    center.X - bmp.Width / 2, center.Y - bmp.Height / 2);
+            fixed (byte* p = &data[0]) return test_window((uint)data.Length, p, bmp.Width, bmp.Height, 5, 5);
         }
 
         [DllImport("roux.dll")]
