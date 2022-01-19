@@ -20,9 +20,10 @@ namespace RouxForms
             Bitmap bmp = radioButton1.Checked ? Properties.Resources.car : Properties.Resources.cube;
 
             Rectangle bounds = Screen.FromControl(this).Bounds;
-            int size = (int)(Math.Min(bounds.Width, bounds.Height) * 0.95);
+            double size = Math.Min(bounds.Width, bounds.Height) * 0.95;
+            Point center = new Point((int)(bounds.Width * 0.475), (int)(bounds.Height * 0.475));
 
-            label1.Text = $"{TestWindow(bmp, size)} clicks";
+            label1.Text = $"{TestWindow(bmp, size, center)} clicks";
         }
     }
 }

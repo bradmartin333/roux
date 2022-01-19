@@ -21,6 +21,10 @@ pub struct CanvasInfo {
     pub width: usize,
     /// The height of the canvas, in virtual pixels.
     pub height: usize,
+    /// The starting left position of the canvas, in virtual pixels.
+    pub start_pos_x: i32,
+    /// The starting top position canvas, in virtual pixels.
+    pub start_pos_y: i32,
     /// The base title for the window.
     pub title: String,
     /// Whether the canvas will render in hidpi mode. Defaults to `false`.
@@ -49,11 +53,13 @@ pub struct Canvas<State, Handler = EventHandler<State>> {
 
 impl Canvas<()> {
     /// Create a new canvas with a given virtual window dimensions.
-    pub fn new(width: usize, height: usize) -> Canvas<()> {
+    pub fn new(width: usize, height: usize, start_pos_x: i32, start_pos_y: i32) -> Canvas<()> {
         Canvas {
             info: CanvasInfo {
                 width,
                 height,
+                start_pos_x,
+                start_pos_y,
                 hidpi: false,
                 dpi: 1.0,
                 title: "Canvas".into(),
@@ -168,7 +174,11 @@ where
                 self.info.width as f64,
                 self.info.height as f64,
             ))
-            .with_resizable(false);
+            .with_resizable(true)
+            .with_position(glutin::dpi::PhysicalPosition::new(
+                self.info.start_pos_x,
+                self.info.start_pos_y,
+            ));
         let cb = glutin::ContextBuilder::new().with_vsync(true);
         let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
@@ -222,11 +232,6 @@ where
                         .gl_window()
                         .window()
                         .set_inner_size(glutin::dpi::LogicalSize::new(width as f64, height as f64));
-                    // Hardcode to put window in top left
-                    display
-                        .gl_window()
-                        .window()
-                        .set_outer_position(glutin::dpi::LogicalPosition::new(0 as f64, 0 as f64));
                 }
                 texture.write(
                     Rect {

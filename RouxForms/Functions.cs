@@ -6,15 +6,28 @@ namespace RouxForms
     public class Functions
     {
         [DllImport("roux.dll")]
-        unsafe public static extern uint test_window(uint len, byte* ptr, uint wid, uint hgt);
+        unsafe public static extern uint test_window(uint len, byte* ptr, int wid, int hgt, int x, int y);
 
-        unsafe public static uint TestWindow(Bitmap bmp, int size)
+        unsafe public static uint TestWindow(Bitmap bmp, double size, Point center)
         {
+            // Predict size after red channel extraction
             Size bmpSize = bmp.Width % 12 == 0 ? bmp.Size : new Size(bmp.Width / 12 * 12, bmp.Height);
-            int scale = Math.Max(bmpSize.Width, bmpSize.Height) / size;
-            bmp = new Bitmap((Bitmap)bmp.Clone(), new Size(bmpSize.Width / scale, bmpSize.Height / scale));
+
+            // How much to shrink the image by to fit in a large window
+            double scale = Math.Max(bmpSize.Width, bmpSize.Height) / size;
+
+            // Clone bitmap and scale down
+            bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)(bmpSize.Width / scale), (int)(bmpSize.Height / scale)));
+
+            // Extract red channel and resize to the predicted size
             byte[] data = GetRedChannelArr(ref bmp);
-            fixed (byte* p = &data[0]) return test_window((uint)data.Length, p, (uint)bmp.Width, (uint)bmp.Height);
+
+            // Send red channel data and image size info
+            fixed (byte* p = &data[0])
+                return test_window(
+                    (uint)data.Length, p, 
+                    bmp.Width, bmp.Height, 
+                    center.X - bmp.Width / 2, center.Y - bmp.Height / 2);
         }
 
         [DllImport("roux.dll")]
