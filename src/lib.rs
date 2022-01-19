@@ -5,11 +5,17 @@ mod input;
 mod window;
 
 #[no_mangle]
-pub extern "C" fn test_window(a: u8, b: u8) -> u32 {
+pub unsafe extern "C" fn test_window(
+    size: u32,
+    array_pointer: *const u8,
+    wid: u32,
+    hgt: u32,
+) -> u32 {
+    let data = std::slice::from_raw_parts(array_pointer, size as usize);
     let zero: Box<u32> = Box::new(0);
     let pointer = Box::into_raw(zero);
-    window::test(a, b, pointer);
-    let num_clicks = unsafe { Box::from_raw(pointer) };
+    window::test(pointer, data, wid, hgt);
+    let num_clicks = Box::from_raw(pointer);
     *num_clicks
 }
 

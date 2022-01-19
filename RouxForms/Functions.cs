@@ -6,7 +6,16 @@ namespace RouxForms
     public class Functions
     {
         [DllImport("roux.dll")]
-        public static extern uint test_window(uint a, uint b);
+        unsafe public static extern uint test_window(uint len, byte* ptr, uint wid, uint hgt);
+
+        unsafe public static uint TestWindow(Bitmap bmp, int size)
+        {
+            Size bmpSize = bmp.Width % 12 == 0 ? bmp.Size : new Size(bmp.Width / 12 * 12, bmp.Height);
+            int scale = Math.Max(bmpSize.Width, bmpSize.Height) / size;
+            bmp = new Bitmap((Bitmap)bmp.Clone(), new Size(bmpSize.Width / scale, bmpSize.Height / scale));
+            byte[] data = GetRedChannelArr(ref bmp);
+            fixed (byte* p = &data[0]) return test_window((uint)data.Length, p, (uint)bmp.Width, (uint)bmp.Height);
+        }
 
         [DllImport("roux.dll")]
         unsafe private static extern double get_entropy(uint len, byte* ptr);

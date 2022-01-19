@@ -17,11 +17,12 @@ namespace RouxForms
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (radioButton1.Checked)
-            {
-                uint clicks = test_window(0, 255);
-                System.Diagnostics.Debug.WriteLine(clicks);
-            }
+            Bitmap bmp = radioButton1.Checked ? Properties.Resources.car : Properties.Resources.cube;
+
+            Rectangle bounds = Screen.FromControl(this).Bounds;
+            int size = (int)(Math.Min(bounds.Width, bounds.Height) * 0.95);
+
+            label1.Text = $"{TestWindow(bmp, size)} clicks";
         }
     }
 }

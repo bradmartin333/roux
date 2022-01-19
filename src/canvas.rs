@@ -222,6 +222,11 @@ where
                         .gl_window()
                         .window()
                         .set_inner_size(glutin::dpi::LogicalSize::new(width as f64, height as f64));
+                    // Hardcode to put window in top left
+                    display
+                        .gl_window()
+                        .window()
+                        .set_outer_position(glutin::dpi::LogicalPosition::new(0 as f64, 0 as f64));
                 }
                 texture.write(
                     Rect {
