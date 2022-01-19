@@ -18,9 +18,10 @@ namespace RouxForms
         private void button2_Click(object sender, EventArgs e)
         {
             if (radioButton1.Checked)
-                test_window(0, 255);
-            else
-                test_window(255, 0);
+            {
+                int clicks = test_window(0, 255);
+                System.Diagnostics.Debug.WriteLine(clicks);
+            }
         }
     }
 }

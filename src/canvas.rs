@@ -1,5 +1,5 @@
-use glium::glutin::platform::run_return::EventLoopExtRunReturn;
 use crate::image::Image;
+use glium::glutin::platform::run_return::EventLoopExtRunReturn;
 use glium::{
     glutin::{
         self,

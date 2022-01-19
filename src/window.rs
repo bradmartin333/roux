@@ -2,12 +2,9 @@ use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::input::KeyboardMouseStates;
 
-pub fn test(a: u8, b: u8) {
-    let a_val = a.clone();
-    let b_val = b.clone();
-
+pub fn test(a: u8, b: u8, pointer: *mut i32) {
     let canvas = Canvas::new(500, 500)
-        .title("Oxey Viewer")
+        .title("Roux Viewer")
         .state(KeyboardMouseStates::new())
         .input(KeyboardMouseStates::handle_input);
 
@@ -19,11 +16,19 @@ pub fn test(a: u8, b: u8) {
                 let dy = y as i32 - state.y;
                 let dist = dx * dx + dy * dy;
                 *pixel = Color {
-                    r: if state.received_mouse_press { a_val } else { b_val },
+                    r: if state.received_mouse_press { a } else { b },
                     g: if dist < 128 * 128 { dy as u8 } else { 0 },
                     b: if dist < 128 * 128 { dx as u8 } else { 0 },
                 };
             }
+        }
+
+        if state.received_mouse_press && !state.mouse_clicked
+        {
+            unsafe {
+                *pointer += 1;
+            }
+            state.mouse_clicked = true;
         }
     });
 }

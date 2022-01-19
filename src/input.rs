@@ -4,6 +4,7 @@ use glium::glutin;
 
 pub struct KeyboardMouseStates {
     pub received_mouse_press: bool,
+    pub mouse_clicked: bool,
     pub received_keycode: bool,
     pub keycode: VirtualKeyCode,
     pub x: i32,
@@ -17,6 +18,7 @@ impl KeyboardMouseStates {
     pub fn new() -> Self {
         Self {
             received_mouse_press: false,
+            mouse_clicked: false,
             received_keycode: false,
             keycode: VirtualKeyCode::Escape,
             x: 0,
@@ -76,6 +78,7 @@ impl KeyboardMouseStates {
                     }
                     ElementState::Released => {
                         state_to_change.received_mouse_press = false;
+                        state_to_change.mouse_clicked = false;
                         return false;
                     }
                 },

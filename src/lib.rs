@@ -5,8 +5,12 @@ mod input;
 mod window;
 
 #[no_mangle]
-pub extern "C" fn test_window(a: u8, b: u8) {
-    window::test(a, b);
+pub extern "C" fn test_window(a: u8, b: u8) -> i32 {
+    let zero: Box<i32> = Box::new(0);
+    let pointer = Box::into_raw(zero);
+    window::test(a, b, pointer);
+    let num_clicks = unsafe { Box::from_raw(pointer) };
+    *num_clicks
 }
 
 #[no_mangle]
