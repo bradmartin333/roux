@@ -1,3 +1,4 @@
+use glium::glutin::platform::run_return::EventLoopExtRunReturn;
 use crate::image::Image;
 use glium::{
     glutin::{
@@ -160,7 +161,7 @@ where
     /// this will either be called at 60fps, or only called when state changes.
     /// See [`render_on_change`](struct.Canvas.html#method.render_on_change).
     pub fn render(mut self, mut callback: impl FnMut(&mut State, &mut Image) + 'static) {
-        let event_loop = glutin::event_loop::EventLoop::new();
+        let mut event_loop = glutin::event_loop::EventLoop::new();
         let wb = glutin::window::WindowBuilder::new()
             .with_title(&self.info.title)
             .with_inner_size(glutin::dpi::LogicalSize::new(
@@ -192,7 +193,7 @@ where
 
         let mut next_frame_time = Instant::now();
         let mut should_render = true;
-        event_loop.run(move |event, _, control_flow| match event {
+        event_loop.run_return(move |event, _, control_flow| match event {
             Event::NewEvents(StartCause::ResumeTimeReached { .. })
             | Event::NewEvents(StartCause::Init) => {
                 next_frame_time = next_frame_time + Duration::from_nanos(16_666_667);
