@@ -13,9 +13,16 @@ pub unsafe extern "C" fn test_window(
     x: i32,
     y: i32,
 ) -> u32 {
-    let data = std::slice::from_raw_parts(array_pointer, size as usize);
     let mut num_clicks: u32 = 0;
-    window::test(&mut num_clicks, data, wid, hgt, x, y);
+    window::test(
+        &mut num_clicks,
+        array_pointer,
+        size as usize,
+        wid,
+        hgt,
+        x,
+        y,
+    );
     num_clicks
 }
 

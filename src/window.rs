@@ -4,14 +4,15 @@ use crate::input::KeyboardMouseStates;
 
 pub fn test(
     num_clicks: *mut u32,
-    data: &'static [u8],
+    array_pointer: *const u8,
+    size: usize,
     wid: i32,
     hgt: i32,
     start_pos_x: i32,
     start_pos_y: i32,
 ) {
     let brush_size: i32 = 10;
-    let mut canvas_data = vec![0; data.len()];
+    let mut canvas_data: Vec<u8> = vec![0; size];
 
     let canvas = Canvas::new(wid as usize, hgt as usize, start_pos_x, start_pos_y)
         .title("Roux Viewer")
@@ -19,6 +20,7 @@ pub fn test(
         .input(KeyboardMouseStates::handle_input);
 
     canvas.render(move |state, image| {
+        let data = unsafe { std::slice::from_raw_parts(array_pointer, size) };
         let width = image.width();
         let height = image.height() - 1;
         for (y, row) in image.chunks_mut(width).enumerate() {

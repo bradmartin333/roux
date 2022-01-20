@@ -5,10 +5,12 @@ namespace RouxForms
 {
     public class Functions
     {
+        unsafe private static byte* DataPointer;
+
         [DllImport("roux.dll")]
         unsafe private static extern uint test_window(uint len, byte* ptr, int wid, int hgt, int x, int y);
 
-        unsafe public static uint TestWindow(Bitmap bmp, SizeF size)
+        unsafe public static uint TestWindow(Bitmap bmp, SizeF size, int test)
         {
             // Predict size after red channel extraction
             Size bmpSize = bmp.Width % 12 == 0 ? bmp.Size : new Size(bmp.Width / 12 * 12, bmp.Height);
@@ -26,10 +28,21 @@ namespace RouxForms
                     bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)size.Width, (int)(bmpSize.Height / (bmpSize.Width / size.Width))));
 
             // Extract red channel and resize to the predicted size
-            byte[] data = GetRedChannelArr(ref bmp);
+            byte[] data = GetRedChannelArr(ref bmp, test);
 
-            // Send red channel data and image size info
-            fixed (byte* p = &data[0]) return test_window((uint)data.Length, p, bmp.Width, bmp.Height, 5, 5);
+            if (test == 1) // Send red channel data and image size info to window
+            {
+                fixed (byte* p = &data[0])
+                {
+                    DataPointer = p;
+                    return test_window((uint)data.Length, p, bmp.Width, bmp.Height, 5, 5);
+                }
+            }
+            else // Update data
+                for (int i = 0; i < data.Length; i++)
+                    DataPointer[i] = data[i];
+
+            return 0; // No form opened
         }
 
         [DllImport("roux.dll")]
@@ -40,7 +53,7 @@ namespace RouxForms
             fixed (byte* p = &data[0]) return get_entropy((uint)data.Length, p);
         }
 
-        public static byte[] GetRedChannelArr(ref Bitmap bmp)
+        public static byte[] GetRedChannelArr(ref Bitmap bmp, int test)
         {
             // Crop image down if it will create a border in BitmapData
             // Divisible by both 4 and 3 is the same as divisible by 12
@@ -63,7 +76,7 @@ namespace RouxForms
 
             // Copy every red channel value
             for (int counter = 2; counter < rgbValues.Length; counter += 3)
-                rValues[counter / 3] = rgbValues[counter];
+                rValues[counter / 3] = (byte)(test % 2 == 0 ? 255 - rgbValues[counter] : rgbValues[counter]);
 
             return rValues;
         }
