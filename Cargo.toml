@@ -7,7 +7,7 @@ authors = [
 ]
 keywords = ["AOI", "imaging", "analysis"]
 readme = "README.md"
-description = "Lightwieght AOI"
+description = "Lightwieght AOI library for C# implementation"
 license = "MIT"
 repository = "https://github.com/bradmartin333/roux.git"
 homepage = "https://github.com/bradmartin333/roux"
