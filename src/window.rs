@@ -12,7 +12,6 @@ pub fn test(
 ) {
     let brush_size: i32 = 10;
     let mut canvas_data = vec![0; data.len()];
-    canvas_data.clone_from_slice(data);
 
     let canvas = Canvas::new(wid as usize, hgt as usize, start_pos_x, start_pos_y)
         .title("Roux Viewer")
@@ -26,37 +25,30 @@ pub fn test(
             for (x, pixel) in row.iter_mut().enumerate() {
                 let dx = x as i32 - state.x;
                 let dy = y as i32 - state.y;
-                let dist = dx * dx + dy * dy;
                 if state.received_mouse_press && !state.mouse_clicked {
                     for i in (brush_size / -2)..(brush_size / 2) {
                         for j in 0..brush_size {
                             canvas_data[(height - state.y as usize + j as usize) * width
                                 + i as usize
-                                + state.x as usize] = 255;
+                                + state.x as usize] = 1;
                         }
                     }
                 }
-                let lux = canvas_data[(height - y) * width + x];
+                let idx = (height - y) * width + x;
+                let lux = data[idx];
+                let crosshair = if canvas_data[idx] == 1 {
+                    0
+                } else {
+                    if dx.abs() < brush_size / 2 || dy.abs() < brush_size / 2 {
+                        200
+                    } else {
+                        lux
+                    }
+                };
                 *pixel = Color {
-                    r: lux,
-                    g: if dist < 128 * 128 {
-                        dy as u8
-                    } else {
-                        if lux == 255 {
-                            0
-                        } else {
-                            lux
-                        }
-                    },
-                    b: if dist < 128 * 128 {
-                        dx as u8
-                    } else {
-                        if lux == 255 {
-                            0
-                        } else {
-                            lux
-                        }
-                    },
+                    r: if canvas_data[idx] == 1 { 255 } else { lux },
+                    g: crosshair,
+                    b: crosshair,
                 };
             }
         }
