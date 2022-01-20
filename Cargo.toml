@@ -2,10 +2,15 @@
 name = "roux"
 version = "0.0.1"
 edition = "2021"
-description = "Lightwieght AOI"
 authors = [
   "bradmartin333"
 ]
+keywords = ["AOI", "imaging", "analysis"]
+readme = "README.md"
+description = "Lightwieght AOI"
+license = "MIT"
+repository = "https://github.com/bradmartin333/roux.git"
+homepage = "https://github.com/bradmartin333/roux"
 
 [lib]
 name="roux"
