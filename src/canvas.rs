@@ -27,16 +27,6 @@ pub struct CanvasInfo {
     pub start_pos_y: i32,
     /// The base title for the window.
     pub title: String,
-    /// Whether the canvas will render in hidpi mode. Defaults to `false`.
-    pub hidpi: bool,
-    /// The DPI factor. If hidpi is on, the virtual dimensions are multiplied
-    /// by this factor to create the actual image resolution. For example, if
-    /// you're on a Retina Macbook, this will be 2.0, so the image will be
-    /// twice the resolution that you specified.
-    pub dpi: f64,
-    /// Whether the window title will display the time to render a frame.
-    /// Defaults to `false`.
-    pub show_ms: bool,
     /// Only call the render callback if there's a state change.
     /// Defaults to `false`, which means it will instead render at a fixed framerate.
     pub render_on_change: bool,
@@ -60,10 +50,7 @@ impl Canvas<()> {
                 height,
                 start_pos_x,
                 start_pos_y,
-                hidpi: false,
-                dpi: 1.0,
                 title: "Canvas".into(),
-                show_ms: false,
                 render_on_change: false,
             },
             image: Image::new(width, height),
@@ -96,34 +83,6 @@ where
         Self {
             info: CanvasInfo {
                 title: text.into(),
-                ..self.info
-            },
-            ..self
-        }
-    }
-
-    /// Toggle hidpi render.
-    ///
-    /// Defaults to `false`.
-    /// If you have a hidpi monitor, this will cause the image to be larger
-    /// than the dimensions you specified when creating the canvas.
-    pub fn hidpi(self, enabled: bool) -> Self {
-        Self {
-            info: CanvasInfo {
-                hidpi: enabled,
-                ..self.info
-            },
-            ..self
-        }
-    }
-
-    /// Whether to show a frame duration in the title bar.
-    ///
-    /// Defaults to `false`.
-    pub fn show_ms(self, enabled: bool) -> Self {
-        Self {
-            info: CanvasInfo {
-                show_ms: enabled,
                 ..self.info
             },
             ..self
@@ -184,14 +143,8 @@ where
 
         display.gl_window().window().set_cursor_visible(false);
 
-        self.info.dpi = if self.info.hidpi {
-            display.gl_window().window().scale_factor()
-        } else {
-            1.0
-        };
-
-        let width = (self.info.width as f64 * self.info.dpi) as usize;
-        let height = (self.info.height as f64 * self.info.dpi) as usize;
+        let width = self.info.width;
+        let height = self.info.height;
         self.image = Image::new(width, height);
 
         let mut texture = glium::Texture2d::empty_with_format(
@@ -216,7 +169,6 @@ where
                 if self.info.render_on_change {
                     should_render = false;
                 }
-                let frame_start = Instant::now();
 
                 callback(&mut self.state, &mut self.image);
                 let width = self.image.width() as u32;
@@ -250,15 +202,6 @@ where
                     .as_surface()
                     .fill(&target, glium::uniforms::MagnifySamplerFilter::Linear);
                 target.finish().unwrap();
-
-                let frame_end = Instant::now();
-                if self.info.show_ms {
-                    display.gl_window().window().set_title(&format!(
-                        "{} - {:3}ms",
-                        self.info.title,
-                        frame_end.duration_since(frame_start).as_millis()
-                    ));
-                }
             }
             glutin::event::Event::WindowEvent {
                 event: glutin::event::WindowEvent::CloseRequested,

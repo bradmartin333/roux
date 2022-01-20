@@ -1,6 +1,6 @@
 use crate::canvas::Canvas;
 use crate::color::Color;
-use crate::input::KeyboardMouseStates;
+use crate::input::MouseStates;
 
 pub fn test(
     num_clicks: *mut u32,
@@ -16,8 +16,8 @@ pub fn test(
 
     let canvas = Canvas::new(wid as usize, hgt as usize, start_pos_x, start_pos_y)
         .title("Roux Viewer")
-        .state(KeyboardMouseStates::new())
-        .input(KeyboardMouseStates::handle_input);
+        .state(MouseStates::new())
+        .input(MouseStates::handle_input);
 
     canvas.render(move |state, image| {
         let data = unsafe { std::slice::from_raw_parts(array_pointer, size) };
