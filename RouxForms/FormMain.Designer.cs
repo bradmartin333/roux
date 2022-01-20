@@ -49,7 +49,6 @@
             this.RdCar.TabStop = true;
             this.RdCar.Text = "Car";
             this.RdCar.UseVisualStyleBackColor = true;
-            this.RdCar.CheckedChanged += new System.EventHandler(this.Rd_CheckedChanged);
             // 
             // RdCube
             // 
@@ -61,7 +60,6 @@
             this.RdCube.TabIndex = 1;
             this.RdCube.Text = "Cube";
             this.RdCube.UseVisualStyleBackColor = true;
-            this.RdCube.CheckedChanged += new System.EventHandler(this.Rd_CheckedChanged);
             // 
             // BtnGetEntropy
             // 
@@ -105,7 +103,6 @@
             this.RdTower.TabIndex = 5;
             this.RdTower.Text = "Tower";
             this.RdTower.UseVisualStyleBackColor = true;
-            this.RdTower.CheckedChanged += new System.EventHandler(this.Rd_CheckedChanged);
             // 
             // RdTall
             // 
@@ -117,7 +114,6 @@
             this.RdTall.TabIndex = 6;
             this.RdTall.Text = "Tall";
             this.RdTall.UseVisualStyleBackColor = true;
-            this.RdTall.CheckedChanged += new System.EventHandler(this.Rd_CheckedChanged);
             // 
             // FormMain
             // 

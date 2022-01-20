@@ -9,7 +9,6 @@ pub struct MouseStates {
     pub y: i32,
 }
 
-#[allow(deprecated)]
 impl MouseStates {
     pub fn new() -> Self {
         Self {
@@ -30,21 +29,16 @@ impl MouseStates {
                 window_id: _window_id,
                 event: window_event,
             } => match window_event {
-                WindowEvent::CursorMoved {
-                    device_id: _device_id,
-                    position,
-                    modifiers: _modifiers,
-                } => {
+                WindowEvent::CursorMoved { position, .. } => {
                     let (x, y): (i32, i32) = (*position).into();
                     state_to_change.x = x;
                     state_to_change.y = info.height as i32 - y;
                     true
                 }
                 WindowEvent::MouseInput {
-                    device_id: _device_id,
                     state,
                     button: _button,
-                    modifiers: _modifiers,
+                    ..
                 } => match state {
                     ElementState::Pressed => {
                         state_to_change.received_mouse_press = true;

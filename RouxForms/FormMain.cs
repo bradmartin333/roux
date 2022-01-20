@@ -27,6 +27,7 @@ namespace RouxForms
                 ToggleRd(false);
                 LabelMain.Text = $"{TestWindow(GetSelectedImage(), size, TestEditPixels)} clicks";
                 ToggleRd(true);
+                TestEditPixels = 0;
             }   
             else
                 TestWindow(GetSelectedImage(), size, TestEditPixels);
@@ -50,11 +51,6 @@ namespace RouxForms
             {
                 rd.Enabled = enable;
             }
-        }
-
-        private void Rd_CheckedChanged(object sender, EventArgs e)
-        {
-            TestEditPixels = 0;
         }
     }
 }
