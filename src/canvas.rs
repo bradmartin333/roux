@@ -127,17 +127,16 @@ where
     /// See [`render_on_change`](struct.Canvas.html#method.render_on_change).
     pub fn render(mut self, mut callback: impl FnMut(&mut State, &mut Image) + 'static) {
         let mut event_loop = glutin::event_loop::EventLoop::new();
+        let size = glutin::dpi::LogicalSize::new(self.info.width as f64, self.info.height as f64);
         let wb = glutin::window::WindowBuilder::new()
-            .with_title(&self.info.title)
-            .with_inner_size(glutin::dpi::LogicalSize::new(
-                self.info.width as f64,
-                self.info.height as f64,
-            ))
-            .with_resizable(false)
             .with_position(glutin::dpi::PhysicalPosition::new(
                 self.info.start_pos_x,
                 self.info.start_pos_y,
-            ));
+            ))
+            .with_inner_size(size)
+            .with_resizable(false)
+            .with_max_inner_size(size)
+            .with_title(&self.info.title);
         let cb = glutin::ContextBuilder::new().with_vsync(true);
         let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
