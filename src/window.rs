@@ -27,10 +27,10 @@ pub fn test(
                 let dy = y as i32 - state.y;
                 if state.received_mouse_press && !state.mouse_clicked {
                     for i in (brush_size / -2)..(brush_size / 2) {
-                        for j in 0..brush_size {
-                            canvas_data[(height - state.y as usize + j as usize) * width
-                                + i as usize
-                                + state.x as usize] = 1;
+                        for j in (brush_size / -2)..(brush_size / 2) {
+                            let cursor_idx =
+                                (height as i32 - state.y + j) * width as i32 + i + state.x;
+                            canvas_data[cursor_idx as usize] = 1;
                         }
                     }
                 }
