@@ -83,10 +83,9 @@ pub fn simple_window() {
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
             .unwrap();
 
-    let mut t: f32 = 1.0;
     let mut idx: u32 = 0;
     let window_size: f32 = 2.0;
-    let grid_size: f32 = 10.0;
+    let grid_size: f32 = 100.0;
 
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -109,27 +108,22 @@ pub fn simple_window() {
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
-        t += 0.5;
-        if t > 1.0 {
-            if idx < (grid_size * grid_size) as u32 {
-                let tile_size = window_size / grid_size;
-                let row = (idx % grid_size as u32) as f32 * tile_size - 1.0;
-                let col = (idx / grid_size as u32) as f32 * tile_size - 1.0;
-                vertex_buffers.push(
-                    glium::VertexBuffer::new(
-                        &display,
-                        &new_shape([col, row], [tile_size, tile_size], rand::thread_rng().gen()),
-                    )
-                    .unwrap(),
-                );
-                idx += 1;
-                t = 0.0;
-            } else if idx > 2 && vertex_buffers.len() > 0 {
-                vertex_buffers.remove(0);
-                t = 0.0
-            } else {
-                idx = 0;
-            }
+        if idx < (grid_size * grid_size) as u32 {
+            let tile_size = window_size / grid_size;
+            let row = (idx % grid_size as u32) as f32 * tile_size - 1.0;
+            let col = (idx / grid_size as u32) as f32 * tile_size - 1.0;
+            vertex_buffers.push(
+                glium::VertexBuffer::new(
+                    &display,
+                    &new_shape([col, row], [tile_size, tile_size], rand::thread_rng().gen()),
+                )
+                .unwrap(),
+            );
+            idx += 1;
+        } else if idx > 2 && vertex_buffers.len() > 0 {
+            vertex_buffers.remove(0);
+        } else {
+            idx = 0;
         }
 
         let mut target = display.draw();
