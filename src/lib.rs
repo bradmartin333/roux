@@ -1,8 +1,16 @@
+#[macro_use]
+extern crate glium;
+
 mod canvas;
 mod color;
 mod image;
 mod input;
 mod window;
+
+#[no_mangle]
+pub extern "C" fn simple_window() {
+    window::simple_window();
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn test_window(
