@@ -2,6 +2,7 @@ use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::input::MouseStates;
 use glium::{glutin, Surface};
+use rand::prelude::*;
 
 pub fn simple_window() {
     let event_loop = glutin::event_loop::EventLoop::new();
@@ -50,21 +51,31 @@ pub fn simple_window() {
 
     let vertex_shader_src = r#"
         #version 140
+
         in vec2 position;
         in float score;
-        out float vScore;
+        out vec3 vColor;
+
+        vec3 hsv2rgb(vec3 c)
+        {
+            vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+            vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+            return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+        }
+
         void main() {
             gl_Position = vec4(position, 0.0, 1.0);
-            vScore = score;
+            vColor = hsv2rgb(vec3(score, 1.0, 1.0));
         }
     "#;
 
     let fragment_shader_src = r#"
         #version 140
-        in float vScore;
-        out vec4 color;
+        
+        in vec3 vColor;
+        out vec3 color;
         void main() {
-            color = vec4(vScore, 0.0, 0.0, 1.0);
+            color = vColor;
         }
     "#;
 
@@ -98,7 +109,7 @@ pub fn simple_window() {
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
-        t += 0.2;
+        t += 0.5;
         if t > 1.0 {
             if idx < (grid_size * grid_size) as u32 {
                 let tile_size = window_size / grid_size;
@@ -107,14 +118,15 @@ pub fn simple_window() {
                 vertex_buffers.push(
                     glium::VertexBuffer::new(
                         &display,
-                        &new_shape([col, row], [tile_size, tile_size], 0.5),
+                        &new_shape([col, row], [tile_size, tile_size], rand::thread_rng().gen()),
                     )
                     .unwrap(),
                 );
                 idx += 1;
                 t = 0.0;
-            } else if idx > 1 {
+            } else if idx > 2 && vertex_buffers.len() > 0 {
                 vertex_buffers.remove(0);
+                t = 0.0
             } else {
                 idx = 0;
             }
