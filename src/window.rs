@@ -3,6 +3,8 @@ use crate::color::Color;
 use crate::input::MouseStates;
 use glium::{glutin, Surface};
 
+const MIN_TILE_SIZE: f32 = 5.0;
+
 pub fn simple_window() {
     let event_loop = glutin::event_loop::EventLoop::new();
     let size = glutin::dpi::LogicalSize::new(1000_f64, 500_f64);
@@ -79,7 +81,7 @@ pub fn simple_window() {
             .unwrap();
 
     let mut t: f32 = 0.0;
-    let mut tile_size: f32 = 10.0;
+    let mut tile_size: f32 = MIN_TILE_SIZE;
     let mut scale_factor: f32 = 1.0;
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -117,7 +119,7 @@ pub fn simple_window() {
 
         if scale_factor != 1.0 {
             let new_size = tile_size * scale_factor;
-            if new_size >= 10.0
+            if new_size >= MIN_TILE_SIZE
                 && size.width as f32 / new_size >= 2.0
                 && size.height as f32 / new_size >= 2.0
             {
