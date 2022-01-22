@@ -80,8 +80,11 @@ pub fn simple_window() {
             .unwrap();
 
     let mut idx: u32 = 0;
-    let window_size: [f32; 2] = [2.0, 2.0];
-    let grid_size: [f32; 2] = [(size.width / 10.0) as f32, (size.height / 10.0) as f32];
+    let tile_size: [f64; 2] = [5.0, 5.0];
+    let grid_size: [f32; 2] = [
+        (size.width / tile_size[0]) as f32,
+        (size.height / tile_size[1]) as f32,
+    ];
     event_loop.run(move |event, _, control_flow| {
         match event {
             glutin::event::Event::WindowEvent { event, .. } => match event {
@@ -104,13 +107,12 @@ pub fn simple_window() {
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         if idx < (grid_size[0] * grid_size[1]) as u32 {
-            let tile_size: [f32; 2] =
-                [window_size[0] / grid_size[0], window_size[1] / grid_size[1]];
-            let row = ((idx % grid_size[1] as u32) as f32 * tile_size[1]) - (window_size[1] / 2.0);
-            let col = ((idx / grid_size[1] as u32) as f32 * tile_size[0]) - (window_size[0] / 2.0);
+            let virtual_tile_size: [f32; 2] = [2.0 / grid_size[0], 2.0 / grid_size[1]];
+            let row = ((idx % grid_size[1] as u32) as f32 * virtual_tile_size[1]) - 1.0;
+            let col = ((idx / grid_size[1] as u32) as f32 * virtual_tile_size[0]) - 1.0;
             vertices.append(&mut new_shape(
                 [col, row],
-                [tile_size[0], tile_size[1]],
+                [virtual_tile_size[0], virtual_tile_size[1]],
                 rand::thread_rng().gen(),
             ));
             idx += 1;
