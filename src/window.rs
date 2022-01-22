@@ -2,7 +2,6 @@ use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::input::MouseStates;
 use glium::{glutin, Surface};
-use rand::prelude::*;
 
 pub fn simple_window() {
     let event_loop = glutin::event_loop::EventLoop::new();
@@ -80,7 +79,7 @@ pub fn simple_window() {
             .unwrap();
 
     let mut idx: u32 = 0;
-    let tile_size: [f64; 2] = [5.0, 5.0];
+    let tile_size: [f64; 2] = [10.0, 10.0];
     let grid_size: [f32; 2] = [
         (size.width / tile_size[0]) as f32,
         (size.height / tile_size[1]) as f32,
@@ -113,7 +112,7 @@ pub fn simple_window() {
             vertices.append(&mut new_shape(
                 [col, row],
                 [virtual_tile_size[0], virtual_tile_size[1]],
-                rand::thread_rng().gen(),
+                idx as f32 / (grid_size[0] * grid_size[1]),
             ));
             idx += 1;
         } else if idx > 2 && vertices.len() > 0 {

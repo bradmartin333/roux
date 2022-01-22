@@ -20,4 +20,3 @@ crate-type = ["dylib"]
 
 [dependencies]
 glium = "0.31.0"
-rand = "0.8.4"
