@@ -6,7 +6,7 @@ use rand::prelude::*;
 
 pub fn simple_window() {
     let event_loop = glutin::event_loop::EventLoop::new();
-    let size = glutin::dpi::LogicalSize::new(500_f64, 500_f64);
+    let size = glutin::dpi::LogicalSize::new(1000_f64, 500_f64);
     let wb = glutin::window::WindowBuilder::new().with_inner_size(size);
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
@@ -81,7 +81,7 @@ pub fn simple_window() {
 
     let mut idx: u32 = 0;
     let window_size: [f32; 2] = [2.0, 2.0];
-    let grid_size: [f32; 2] = [10.0, 10.0];
+    let grid_size: [f32; 2] = [(size.width / 10.0) as f32, (size.height / 10.0) as f32];
     event_loop.run(move |event, _, control_flow| {
         match event {
             glutin::event::Event::WindowEvent { event, .. } => match event {
@@ -106,8 +106,8 @@ pub fn simple_window() {
         if idx < (grid_size[0] * grid_size[1]) as u32 {
             let tile_size: [f32; 2] =
                 [window_size[0] / grid_size[0], window_size[1] / grid_size[1]];
-            let row = (idx % grid_size[0] as u32) as f32 * tile_size[0] - window_size[0] / 2.0;
-            let col = (idx / grid_size[0] as u32) as f32 * tile_size[1] - window_size[1] / 2.0;
+            let row = ((idx % grid_size[1] as u32) as f32 * tile_size[1]) - (window_size[1] / 2.0);
+            let col = ((idx / grid_size[1] as u32) as f32 * tile_size[0]) - (window_size[0] / 2.0);
             vertices.append(&mut new_shape(
                 [col, row],
                 [tile_size[0], tile_size[1]],
