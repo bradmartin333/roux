@@ -78,17 +78,22 @@ pub fn simple_window() {
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
             .unwrap();
 
-    let mut idx: u32 = 0;
-    let tile_size: [f64; 2] = [10.0, 10.0];
-    let grid_size: [f32; 2] = [
-        (size.width / tile_size[0]) as f32,
-        (size.height / tile_size[1]) as f32,
-    ];
+    let mut t: f32 = 0.0;
+    let mut tile_size: f32 = 10.0;
+    let mut scale_factor: f32 = 1.0;
     event_loop.run(move |event, _, control_flow| {
         match event {
             glutin::event::Event::WindowEvent { event, .. } => match event {
                 glutin::event::WindowEvent::CloseRequested => {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
+                    return;
+                }
+                glutin::event::WindowEvent::MouseInput { button, .. } => {
+                    match button {
+                        glutin::event::MouseButton::Right => scale_factor = 0.9,
+                        glutin::event::MouseButton::Left => scale_factor = 1.1,
+                        _ => return,
+                    }
                     return;
                 }
                 _ => return,
@@ -98,28 +103,57 @@ pub fn simple_window() {
                 glutin::event::StartCause::Init => (),
                 _ => return,
             },
+            glutin::event::Event::DeviceEvent { event, .. } => match event {
+                glutin::event::DeviceEvent::MouseWheel { delta } => match delta {
+                    glutin::event::MouseScrollDelta::LineDelta(_, s) => {
+                        scale_factor = (((s as f64).signum() * 0.1) + 1.0) as f32;
+                    }
+                    _ => return,
+                },
+                _ => return,
+            },
             _ => return,
+        }
+
+        if scale_factor != 1.0 {
+            let new_size = tile_size * scale_factor;
+            if new_size >= 10.0
+                && size.width as f32 / new_size >= 2.0
+                && size.height as f32 / new_size >= 2.0
+            {
+                t = 0.0;
+                vertices.clear();
+                tile_size = new_size;
+            }
+            scale_factor = 1.0;
         }
 
         let next_frame_time =
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
-        if idx < (grid_size[0] * grid_size[1]) as u32 {
-            let virtual_tile_size: [f32; 2] = [2.0 / grid_size[0], 2.0 / grid_size[1]];
-            let row = ((idx % grid_size[1] as u32) as f32 * virtual_tile_size[1]) - 1.0;
-            let col = ((idx / grid_size[1] as u32) as f32 * virtual_tile_size[0]) - 1.0;
-            vertices.append(&mut new_shape(
-                [col, row],
-                [virtual_tile_size[0], virtual_tile_size[1]],
-                idx as f32 / (grid_size[0] * grid_size[1]),
-            ));
-            idx += 1;
-        } else if idx > 2 && vertices.len() > 0 {
-            vertices.drain(0..6);
-        } else {
-            idx = 0;
+        let grid_size: [f32; 2] = [
+            (size.width as f32 / tile_size).ceil(),
+            (size.height as f32 / tile_size).ceil(),
+        ];
+
+        let mut idx: u32 = 0;
+        loop {
+            if idx < (grid_size[0] * grid_size[1]) as u32 {
+                let virtual_tile_size: [f32; 2] = [2.0 / grid_size[0], 2.0 / grid_size[1]];
+                let row = ((idx % grid_size[1] as u32) as f32 * virtual_tile_size[1]) - 1.0;
+                let col = ((idx / grid_size[1] as u32) as f32 * virtual_tile_size[0]) - 1.0;
+                vertices.append(&mut new_shape(
+                    [col, row],
+                    [virtual_tile_size[0], virtual_tile_size[1]],
+                    (t + idx as f32) / (grid_size[0] * grid_size[1]) % 1.0,
+                ));
+                idx += 1;
+            } else {
+                break;
+            }
         }
+        t += 20.0 / tile_size;
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 0.0);
