@@ -47,7 +47,7 @@ pub fn simple_window() {
         vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6]
     }
 
-    let mut vertex_buffers: Vec<glium::VertexBuffer<Vertex>> = vec![];
+    let mut vertices: Vec<Vertex> = vec![];
 
     let vertex_shader_src = r#"
         #version 140
@@ -84,8 +84,8 @@ pub fn simple_window() {
             .unwrap();
 
     let mut idx: u32 = 0;
-    let window_size: f32 = 2.0;
-    let grid_size: f32 = 100.0;
+    let window_size: [f32; 2] = [2.0, 2.0];
+    let grid_size: [f32; 2] = [10.0, 10.0];
 
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -108,38 +108,37 @@ pub fn simple_window() {
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
-        if idx < (grid_size * grid_size) as u32 {
-            let tile_size = window_size / grid_size;
-            let row = (idx % grid_size as u32) as f32 * tile_size - 1.0;
-            let col = (idx / grid_size as u32) as f32 * tile_size - 1.0;
-            vertex_buffers.push(
-                glium::VertexBuffer::new(
-                    &display,
-                    &new_shape([col, row], [tile_size, tile_size], rand::thread_rng().gen()),
-                )
-                .unwrap(),
-            );
+        if idx < (grid_size[0] * grid_size[1]) as u32 {
+            let tile_size: [f32; 2] =
+                [window_size[0] / grid_size[0], window_size[1] / grid_size[1]];
+            let row = (idx % grid_size[0] as u32) as f32 * tile_size[0] - window_size[0] / 2.0;
+            let col = (idx / grid_size[0] as u32) as f32 * tile_size[1] - window_size[1] / 2.0;
+            vertices.append(&mut new_shape(
+                [col, row],
+                [tile_size[0], tile_size[1]],
+                rand::thread_rng().gen(),
+            ));
             idx += 1;
-        } else if idx > 2 && vertex_buffers.len() > 0 {
-            vertex_buffers.remove(0);
+        } else if idx > 2 && vertices.len() > 0 {
+            vertices.drain(0..6);
         } else {
             idx = 0;
         }
 
         let mut target = display.draw();
-        target.clear_color(0.0, 0.0, 1.0, 1.0);
+        target.clear_color(0.0, 0.0, 0.0, 0.0);
 
-        for vb in &vertex_buffers {
-            target
-                .draw(
-                    vb,
-                    &glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList),
-                    &program,
-                    &glium::uniforms::EmptyUniforms,
-                    &Default::default(),
-                )
-                .unwrap();
-        }
+        let vertex_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
+
+        target
+            .draw(
+                &vertex_buffer,
+                &glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList),
+                &program,
+                &glium::uniforms::EmptyUniforms,
+                &Default::default(),
+            )
+            .unwrap();
 
         target.finish().unwrap();
     });
