@@ -13,65 +13,61 @@ pub fn simple_window() {
 
     #[derive(Copy, Clone)]
     struct Vertex {
-        position: [f32; 2],
+        pos: [f32; 2],
         score: f32,
     }
 
-    implement_vertex!(Vertex, position, score);
+    implement_vertex!(Vertex, pos, score);
+    let mut vertices: Vec<Vertex> = vec![];
 
     fn new_shape(p: [f32; 2], size: [f32; 2], score: f32) -> Vec<Vertex> {
-        let vertex1 = Vertex {
-            position: [p[0], p[1]],
-            score,
-        };
-        let vertex2 = Vertex {
-            position: [p[0], p[1] + size[1]],
-            score,
-        };
-        let vertex3 = Vertex {
-            position: [p[0] + size[0], p[1]],
-            score,
-        };
-        let vertex4 = Vertex {
-            position: [p[0] + size[0], p[1] + size[1]],
-            score,
-        };
-        let vertex5 = Vertex {
-            position: [p[0], p[1] + size[1]],
-            score,
-        };
-        let vertex6 = Vertex {
-            position: [p[0] + size[0], p[1]],
-            score,
-        };
-        vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6]
+        vec![
+            Vertex {
+                pos: [p[0], p[1]],
+                score,
+            },
+            Vertex {
+                pos: [p[0], p[1] + size[1]],
+                score,
+            },
+            Vertex {
+                pos: [p[0] + size[0], p[1]],
+                score,
+            },
+            Vertex {
+                pos: [p[0] + size[0], p[1] + size[1]],
+                score,
+            },
+            Vertex {
+                pos: [p[0], p[1] + size[1]],
+                score,
+            },
+            Vertex {
+                pos: [p[0] + size[0], p[1]],
+                score,
+            },
+        ]
     }
-
-    let mut vertices: Vec<Vertex> = vec![];
 
     let vertex_shader_src = r#"
         #version 140
-
-        in vec2 position;
+        in vec2 pos;
         in float score;
         out vec3 vColor;
-
         vec3 hsv2rgb(vec3 c)
         {
             vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
             vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
             return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
         }
-
         void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
+            gl_Position = vec4(pos, 0.0, 1.0);
             vColor = hsv2rgb(vec3(score, 1.0, 1.0));
         }
     "#;
 
     let fragment_shader_src = r#"
         #version 140
-        
         in vec3 vColor;
         out vec3 color;
         void main() {
@@ -86,7 +82,6 @@ pub fn simple_window() {
     let mut idx: u32 = 0;
     let window_size: [f32; 2] = [2.0, 2.0];
     let grid_size: [f32; 2] = [10.0, 10.0];
-
     event_loop.run(move |event, _, control_flow| {
         match event {
             glutin::event::Event::WindowEvent { event, .. } => match event {
@@ -127,19 +122,15 @@ pub fn simple_window() {
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 0.0);
-
-        let vertex_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
-
         target
             .draw(
-                &vertex_buffer,
+                &glium::VertexBuffer::new(&display, &vertices).unwrap(),
                 &glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList),
                 &program,
                 &glium::uniforms::EmptyUniforms,
                 &Default::default(),
             )
             .unwrap();
-
         target.finish().unwrap();
     });
 }
