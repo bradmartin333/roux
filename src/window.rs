@@ -5,9 +5,9 @@ use glium::{glutin, Surface};
 
 const MIN_TILE_SIZE: f32 = 5.0;
 
-pub fn simple_window() {
+pub fn simple_window(wid: f64, hgt: f64) {
     let event_loop = glutin::event_loop::EventLoop::new();
-    let size = glutin::dpi::LogicalSize::new(1000_f64, 500_f64);
+    let size = glutin::dpi::LogicalSize::new(wid, hgt);
     let wb = glutin::window::WindowBuilder::new().with_inner_size(size);
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();

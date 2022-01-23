@@ -1,26 +1,23 @@
-use image::{open, DynamicImage};
+use image::GenericImageView;
 
 fn main() {
-    roux::simple_window();
+    let (wid, hgt, _data) = get_pixels(&get_test_path());
+    roux::simple_window(wid, hgt);
 }
 
-#[allow(dead_code)]
-fn get_pixels(path: &str) -> Vec<u8> {
-    let rgba = open(path).unwrap().into_rgba8();
-    DynamicImage::ImageRgba8(rgba).into_luma8().into_raw()
-}
-
-#[allow(dead_code)]
-fn test_window_1() {
-    let path = format!(
+fn get_test_path() -> String {
+    format!(
         "{}{}",
         std::env::current_dir().unwrap().display(),
         "/tests/small_car.png"
-    );
-    let data = get_pixels(&path);
-    let test =
-        unsafe { roux::test_window(data.len() as u32, &data[0] as *const u8, 360, 202, 10, 10) };
-    println!("{} Clicks!", test);
+    )
+}
+
+fn get_pixels(path: &str) -> (u32, u32, Vec<u8>) {
+    let img = image::open(path).unwrap();
+    let (width, height) = img.dimensions();
+    let data = img.into_luma8().into_raw();
+    (width, height, data)
 }
 
 #[test]

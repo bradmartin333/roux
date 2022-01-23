@@ -8,8 +8,8 @@ mod input;
 mod window;
 
 #[no_mangle]
-pub extern "C" fn simple_window() {
-    window::simple_window();
+pub extern "C" fn simple_window(wid: u32, hgt: u32) {
+    window::simple_window(wid as f64, hgt as f64);
 }
 
 #[no_mangle]
