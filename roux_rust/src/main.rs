@@ -2,7 +2,7 @@ use image::GenericImageView;
 
 fn main() {
     let (wid, hgt, _data) = get_pixels(&get_test_path());
-    roux::simple_window(wid, hgt);
+    unsafe { roux::test_window(0, 0 as *const u8, wid as u32, hgt as u32) };
 }
 
 fn get_test_path() -> String {

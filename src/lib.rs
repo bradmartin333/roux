@@ -1,37 +1,11 @@
 #[macro_use]
 extern crate glium;
 
-mod canvas;
-mod color;
-mod image;
-mod input;
 mod window;
 
 #[no_mangle]
-pub extern "C" fn simple_window(wid: u32, hgt: u32) {
-    window::simple_window(wid as f64, hgt as f64);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn test_window(
-    size: u32,
-    array_pointer: *const u8,
-    wid: i32,
-    hgt: i32,
-    x: i32,
-    y: i32,
-) -> u32 {
-    let mut num_clicks: u32 = 0;
-    window::test(
-        &mut num_clicks,
-        array_pointer,
-        size as usize,
-        wid,
-        hgt,
-        x,
-        y,
-    );
-    num_clicks
+pub unsafe extern "C" fn test_window(_size: u32, _array_pointer: *const u8, wid: u32, hgt: u32) {
+    window::test(wid as f64, hgt as f64);
 }
 
 #[no_mangle]

@@ -13,10 +13,11 @@ repository = "https://github.com/bradmartin333/roux.git"
 homepage = "https://github.com/bradmartin333/roux"
 
 [lib]
-name="roux"
+name = "roux"
 crate-type = ["dylib"]
 
 [features]
 
 [dependencies]
 glium = "0.31.0"
+image = "0.23.14"

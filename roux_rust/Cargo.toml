@@ -1,5 +1,5 @@
 [package]
-name = "roux_example"
+name = "roux_rust"
 version = "0.1.0"
 edition = "2021"
 
