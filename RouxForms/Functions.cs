@@ -46,6 +46,36 @@ namespace RouxForms
         }
 
         [DllImport("roux.dll")]
+        unsafe private static extern void test_tiles(uint len, byte* ptr, uint stride, uint tile_size);
+
+        unsafe public static void TestTiles(Bitmap bmp, SizeF size)
+        {
+            // Predict size after red channel extraction
+            Size bmpSize = bmp.Width % 12 == 0 ? bmp.Size : new Size(bmp.Width / 12 * 12, bmp.Height);
+
+            // Resize bitmap to fit a single screen
+            if (bmpSize.Width <= bmpSize.Height)
+                if (bmpSize.Height < size.Height)
+                    bmp = new Bitmap((Bitmap)bmp.Clone());
+                else
+                    bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)(bmpSize.Width / (bmpSize.Height / size.Height)), (int)size.Height));
+            else
+                if (bmpSize.Width < size.Width)
+                bmp = new Bitmap((Bitmap)bmp.Clone());
+            else
+                bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)size.Width, (int)(bmpSize.Height / (bmpSize.Width / size.Width))));
+
+            // Extract red channel and resize to the predicted size
+            byte[] data = GetRedChannelArr(ref bmp, 1);
+
+            fixed (byte* p = &data[0])
+            {
+                DataPointer = p;
+                test_tiles((uint)data.Length, p, (uint)bmp.Width, 8);
+            }
+        }
+
+        [DllImport("roux.dll")]
         unsafe private static extern double get_entropy(uint len, byte* ptr);
 
         unsafe public static double GetEntropy(byte[] data)

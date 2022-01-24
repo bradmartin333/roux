@@ -1,9 +1,9 @@
 use crate::glium::glutin::platform::run_return::EventLoopExtRunReturn;
 use glium::{glutin, Surface};
 
-const MIN_TILE_SIZE: f32 = 5.0;
+pub const MIN_TILE_SIZE: f32 = 8.0;
 
-pub fn test(wid: f64, hgt: f64, start_x: f64, start_y: f64) {
+pub fn test(wid: f64, hgt: f64, start_x: f64, start_y: f64, tile_size: *mut f32) {
     let mut event_loop = glutin::event_loop::EventLoop::new();
     let size = glutin::dpi::LogicalSize::new(wid, hgt);
     let start_pos = glutin::dpi::LogicalPosition::new(start_x, start_y);
@@ -82,7 +82,6 @@ pub fn test(wid: f64, hgt: f64, start_x: f64, start_y: f64) {
             .unwrap();
 
     let mut t: f32 = 0.0;
-    let mut tile_size: f32 = MIN_TILE_SIZE;
     let mut scale_factor: f32 = 1.0;
     event_loop.run_return(move |event, _, control_flow| {
         match event {
@@ -119,14 +118,14 @@ pub fn test(wid: f64, hgt: f64, start_x: f64, start_y: f64) {
         }
 
         if scale_factor != 1.0 {
-            let new_size = tile_size * scale_factor;
+            let new_size = unsafe { *tile_size * scale_factor };
             if new_size >= MIN_TILE_SIZE
                 && size.width as f32 / new_size >= 2.0
                 && size.height as f32 / new_size >= 2.0
             {
                 t = 0.0;
                 vertices.clear();
-                tile_size = new_size;
+                unsafe { *tile_size = new_size };
             }
             scale_factor = 1.0;
         }
@@ -136,8 +135,8 @@ pub fn test(wid: f64, hgt: f64, start_x: f64, start_y: f64) {
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         let grid_size: [f32; 2] = [
-            (size.width as f32 / tile_size).ceil(),
-            (size.height as f32 / tile_size).ceil(),
+            (size.width as f32 / unsafe { *tile_size }).ceil(),
+            (size.height as f32 / unsafe { *tile_size }).ceil(),
         ];
 
         let mut idx: u32 = 0;
@@ -156,7 +155,7 @@ pub fn test(wid: f64, hgt: f64, start_x: f64, start_y: f64) {
                 break;
             }
         }
-        t += 20.0 / tile_size;
+        t += 20.0 / unsafe { *tile_size };
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 0.0);

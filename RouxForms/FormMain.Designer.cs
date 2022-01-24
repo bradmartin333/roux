@@ -35,6 +35,7 @@
             this.BtnTestWindow = new System.Windows.Forms.Button();
             this.RdTower = new System.Windows.Forms.RadioButton();
             this.RdTall = new System.Windows.Forms.RadioButton();
+            this.BtnTestTiles = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // RdCar
@@ -115,11 +116,23 @@
             this.RdTall.Text = "Tall";
             this.RdTall.UseVisualStyleBackColor = true;
             // 
+            // BtnTestTiles
+            // 
+            this.BtnTestTiles.Location = new System.Drawing.Point(294, 14);
+            this.BtnTestTiles.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.BtnTestTiles.Name = "BtnTestTiles";
+            this.BtnTestTiles.Size = new System.Drawing.Size(88, 27);
+            this.BtnTestTiles.TabIndex = 7;
+            this.BtnTestTiles.Text = "Test Tiles";
+            this.BtnTestTiles.UseVisualStyleBackColor = true;
+            this.BtnTestTiles.Click += new System.EventHandler(this.BtnTestTiles_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(298, 125);
+            this.ClientSize = new System.Drawing.Size(387, 125);
+            this.Controls.Add(this.BtnTestTiles);
             this.Controls.Add(this.RdTall);
             this.Controls.Add(this.RdTower);
             this.Controls.Add(this.BtnTestWindow);
@@ -144,6 +157,7 @@
         private Button BtnTestWindow;
         private RadioButton RdTower;
         private RadioButton RdTall;
+        private Button BtnTestTiles;
     }
 }
 

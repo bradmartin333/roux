@@ -25,7 +25,7 @@ namespace RouxForms
             if (TestEditPixels == 1)
             {
                 ToggleRd(false);
-                LabelMain.Text = $"{TestWindow(GetSelectedImage(), size, TestEditPixels)} clicks";
+                LabelMain.Text = $"{TestWindow(GetSelectedImage(), size, TestEditPixels)} pixels";
                 ToggleRd(true);
                 TestEditPixels = 0;
             }   
@@ -51,6 +51,13 @@ namespace RouxForms
             {
                 rd.Enabled = enable;
             }
+        }
+
+        private void BtnTestTiles_Click(object sender, EventArgs e)
+        {
+            Rectangle bounds = Screen.FromControl(this).Bounds;
+            SizeF size = new((int)(bounds.Width * 0.9), (int)(bounds.Height * 0.9));
+            TestTiles(GetSelectedImage(), size);
         }
     }
 }
