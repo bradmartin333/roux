@@ -1,7 +1,14 @@
 #[macro_use]
 extern crate glium;
-use crate::glium::glutin::platform::run_return::EventLoopExtRunReturn;
-use glium::{glutin, Surface};
+use glium::{
+    glutin::{
+        dpi::{LogicalPosition, LogicalSize},
+        event::{DeviceEvent, Event, MouseButton, MouseScrollDelta, StartCause, WindowEvent},
+        event_loop::{ControlFlow, EventLoop},
+        platform::run_return::EventLoopExtRunReturn,
+    },
+    Surface,
+};
 
 const MIN_TILE_SIZE: f32 = 3.0;
 const VERTEX_SHADER: &str = r#"
@@ -44,13 +51,13 @@ pub extern "C" fn test_window(
     start_x: u32,
     start_y: u32,
 ) {
-    let mut event_loop = glutin::event_loop::EventLoop::new();
-    let size = glutin::dpi::LogicalSize::new(wid, hgt);
-    let start_pos = glutin::dpi::LogicalPosition::new(start_x, start_y);
-    let wb = glutin::window::WindowBuilder::new()
+    let mut event_loop = EventLoop::new();
+    let size = LogicalSize::new(wid, hgt);
+    let start_pos = LogicalPosition::new(start_x, start_y);
+    let wb = glium::glutin::window::WindowBuilder::new()
         .with_inner_size(size)
         .with_position(start_pos);
-    let cb = glutin::ContextBuilder::new();
+    let cb = glium::glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     implement_vertex!(Vertex, pos, score);
@@ -91,26 +98,26 @@ pub extern "C" fn test_window(
     let mut last_data: Vec<u8> = vec![];
     event_loop.run_return(move |event, _, control_flow| {
         match event {
-            glutin::event::Event::WindowEvent { event, .. } => match event {
-                glutin::event::WindowEvent::CloseRequested => {
-                    *control_flow = glutin::event_loop::ControlFlow::Exit;
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit;
                     return;
                 }
-                glutin::event::WindowEvent::MouseInput { button, .. } => match button {
-                    glutin::event::MouseButton::Right => scale_factor = 0.9,
-                    glutin::event::MouseButton::Left => scale_factor = 1.1,
+                WindowEvent::MouseInput { button, .. } => match button {
+                    MouseButton::Right => scale_factor = 0.9,
+                    MouseButton::Left => scale_factor = 1.1,
                     _ => (),
                 },
                 _ => (),
             },
-            glutin::event::Event::NewEvents(cause) => match cause {
-                glutin::event::StartCause::ResumeTimeReached { .. } => (),
-                glutin::event::StartCause::Init => (),
+            Event::NewEvents(cause) => match cause {
+                StartCause::ResumeTimeReached { .. } => (),
+                StartCause::Init => (),
                 _ => (),
             },
-            glutin::event::Event::DeviceEvent { event, .. } => match event {
-                glutin::event::DeviceEvent::MouseWheel { delta } => match delta {
-                    glutin::event::MouseScrollDelta::LineDelta(_, s) => {
+            Event::DeviceEvent { event, .. } => match event {
+                DeviceEvent::MouseWheel { delta } => match delta {
+                    MouseScrollDelta::LineDelta(_, s) => {
                         scale_factor = (((s as f64).signum() * 0.1) + 1.0) as f32;
                     }
                     _ => (),
@@ -133,7 +140,7 @@ pub extern "C" fn test_window(
 
         let next_frame_time =
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
-        *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
+        *control_flow = ControlFlow::WaitUntil(next_frame_time);
 
         let grid_size: [f32; 2] = [
             (size.width as f32 / tile_size).ceil(),
