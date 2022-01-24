@@ -11,12 +11,6 @@ namespace RouxForms
             InitializeComponent();
         }
 
-        private void BtnGetEntropy_Click(object sender, EventArgs e)
-        {
-            Bitmap bmp = GetSelectedImage();
-            LabelMain.Text = GetEntropy(GetRedChannelArr(ref bmp, 1)).ToString();
-        }
-
         private void BtnTestWindow_Click(object sender, EventArgs e)
         {
             TestEditPixels++;
@@ -25,12 +19,12 @@ namespace RouxForms
             if (TestEditPixels == 1)
             {
                 ToggleRd(false);
-                TestWindow(GetSelectedImage(), size, TestEditPixels);
+                TestWindow(GetSelectedImage(), size, initialImage: true);
                 ToggleRd(true);
                 TestEditPixels = 0;
             }   
             else
-                TestWindow(GetSelectedImage(), size, TestEditPixels);
+                TestWindow(GetSelectedImage(), size);
         }
 
         private Bitmap GetSelectedImage()
@@ -48,16 +42,7 @@ namespace RouxForms
         private void ToggleRd(bool enable)
         {
             foreach (RadioButton rd in Controls.OfType<RadioButton>())
-            {
                 rd.Enabled = enable;
-            }
-        }
-
-        private void BtnTestTiles_Click(object sender, EventArgs e)
-        {
-            Rectangle bounds = Screen.FromControl(this).Bounds;
-            SizeF size = new((int)(bounds.Width * 0.9), (int)(bounds.Height * 0.9));
-            TestTiles(GetSelectedImage(), size);
         }
     }
 }
