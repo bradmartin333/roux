@@ -10,7 +10,7 @@ use glium::{
     Surface,
 };
 
-const MIN_TILE_SIZE: f32 = 3.0;
+const TILE_SIZE: f32 = 3.0;
 const VERTEX_SHADER: &str = r#"
     #version 140
     in vec2 pos;
@@ -51,6 +51,7 @@ pub extern "C" fn test_window(
     start_x: u32,
     start_y: u32,
 ) {
+    // Window
     let mut event_loop = EventLoop::new();
     let size = LogicalSize::new(wid, hgt);
     let start_pos = LogicalPosition::new(start_x, start_y);
@@ -60,6 +61,7 @@ pub extern "C" fn test_window(
     let cb = glium::glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
+    // Shader
     implement_vertex!(Vertex, pos, score);
     let mut vertices: Vec<Vertex> = vec![];
     fn new_shape(p: [f32; 2], size: [f32; 2], score: f32) -> Vec<Vertex> {
@@ -92,11 +94,16 @@ pub extern "C" fn test_window(
     }
     let program = glium::Program::from_source(&display, VERTEX_SHADER, FRAG_SHADER, None).unwrap();
 
-    let mut scale_factor: f32 = 1.0;
-    let mut tile_size: f32 = MIN_TILE_SIZE;
+    // Grid parameters
+    let mut scale_factor: i32 = 0;
+    let mut tile_size: f32 = TILE_SIZE * 3.0;
+
+    // Refresh parameters
     let mut last_tile_size: f32 = 0.0;
     let mut last_data: Vec<u8> = vec![];
+
     event_loop.run_return(move |event, _, control_flow| {
+        // Event handlers
         match event {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => {
@@ -104,8 +111,8 @@ pub extern "C" fn test_window(
                     return;
                 }
                 WindowEvent::MouseInput { button, .. } => match button {
-                    MouseButton::Right => scale_factor = 0.9,
-                    MouseButton::Left => scale_factor = 1.1,
+                    MouseButton::Right => scale_factor = 1,
+                    MouseButton::Left => scale_factor = -1,
                     _ => (),
                 },
                 _ => (),
@@ -118,7 +125,7 @@ pub extern "C" fn test_window(
             Event::DeviceEvent { event, .. } => match event {
                 DeviceEvent::MouseWheel { delta } => match delta {
                     MouseScrollDelta::LineDelta(_, s) => {
-                        scale_factor = (((s as f64).signum() * 0.1) + 1.0) as f32;
+                        scale_factor = s as i32;
                     }
                     _ => (),
                 },
@@ -127,40 +134,44 @@ pub extern "C" fn test_window(
             _ => (),
         }
 
-        if scale_factor != 1.0 {
-            let new_size = tile_size * scale_factor;
-            if new_size >= MIN_TILE_SIZE
-                && size.width as f32 / new_size >= 2.0
-                && size.height as f32 / new_size >= 2.0
-            {
+        // Grid resizing
+        if scale_factor != 0 {
+            let new_size = tile_size + scale_factor as f32;
+            if new_size >= TILE_SIZE && wid / new_size as u32 >= 2 && hgt / new_size as u32 >= 2 {
                 tile_size = new_size;
             }
-            scale_factor = 1.0;
+            scale_factor = 0;
         }
+        let grid_size: [u32; 2] = [
+            (size.width as f32 / tile_size).ceil() as u32,
+            (size.height as f32 / tile_size).ceil() as u32,
+        ];
 
+        // FPS control
         let next_frame_time =
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = ControlFlow::WaitUntil(next_frame_time);
 
-        let grid_size: [f32; 2] = [
-            (size.width as f32 / tile_size).ceil(),
-            (size.height as f32 / tile_size).ceil(),
-        ];
-
+        // Read image from heap
         let data = unsafe { std::slice::from_raw_parts(array_pointer, array_size as usize) };
+
+        // Rebuild shaders if new data or grid size
         if tile_size != last_tile_size || data.to_vec() != last_data {
             last_tile_size = tile_size;
             last_data = data.to_vec();
             vertices.clear();
 
+            // Store tiles by (x, y, entropy)
             let mut entropies: Vec<(u32, u32, f64)> = vec![];
             let mut min_entropy: f64 = std::f64::MAX;
             let mut max_entropy: f64 = std::f64::MIN;
+
+            // Iterate through heap image in tiles
             for j in (0..(data.len() as u32 / wid as u32)).step_by(tile_size as usize) {
                 'block: for i in (0..wid as u32).step_by(tile_size as usize) {
+                    // Calculate shannon entropy of pixel data within tile
                     let mut entropy = 0.0;
                     let mut counts = [0; 256];
-
                     for k in 0..tile_size as u32 {
                         for l in 0..tile_size as u32 {
                             let idx = ((j + l) * wid as u32) + (i + k);
@@ -172,7 +183,6 @@ pub extern "C" fn test_window(
                             }
                         }
                     }
-
                     for &count in &counts {
                         if count == 0 {
                             continue;
@@ -181,6 +191,7 @@ pub extern "C" fn test_window(
                         entropy -= p * p.log(2.0);
                     }
 
+                    // Store min and max for hue scaling
                     if entropy > max_entropy {
                         max_entropy = entropy
                     };
@@ -189,13 +200,16 @@ pub extern "C" fn test_window(
                     };
                     entropies.push((
                         i / tile_size as u32,
-                        (grid_size[1] - (j as f32 / tile_size)).abs() as u32,
+                        (grid_size[1] - (j / tile_size as u32)) as u32,
                         entropy,
                     ));
                 }
             }
 
-            let virtual_tile_size: [f32; 2] = [2.0 / grid_size[0], 2.0 / grid_size[1]];
+            // Grid goes from -1 to 1 in X and Y
+            let virtual_tile_size: [f32; 2] =
+                [2.0 / grid_size[0] as f32, 2.0 / grid_size[1] as f32];
+
             for entropy in entropies {
                 let row = (entropy.1 as f32 * virtual_tile_size[1]) - 1.0;
                 let col = (entropy.0 as f32 * virtual_tile_size[0]) - 1.0;
