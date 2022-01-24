@@ -4,8 +4,8 @@ use glium::{
     glutin::{
         dpi::{LogicalPosition, LogicalSize},
         event::{
-            DeviceEvent, ElementState, Event, MouseButton, MouseScrollDelta, StartCause,
-            VirtualKeyCode, WindowEvent,
+            DeviceEvent, ElementState, Event, MouseScrollDelta, StartCause, VirtualKeyCode,
+            WindowEvent,
         },
         event_loop::{ControlFlow, EventLoop},
         platform::run_return::EventLoopExtRunReturn,
@@ -13,7 +13,6 @@ use glium::{
     Surface,
 };
 
-const THRESHOLD_INC: f64 = 0.01;
 const TILE_SIZE: f32 = 3.0;
 const VERTEX_SHADER: &str = r#"
     #version 140
@@ -108,42 +107,29 @@ pub extern "C" fn test_window(
 
     // Scoring parameters
     let mut flip_hue = false;
+    let mut threshold_inc: f64 = 0.001;
     let mut threshold = 0.0;
-
-    // Mouse info
-    let mut cursor_pos: (i32, i32) = (0, 0);
 
     // Refresh parameters
     let mut last_tile_size: f32 = 0.0;
     let mut last_data: Vec<u8> = vec![];
     let mut last_flip_hue = flip_hue;
     let mut last_threshold = threshold;
-    let mut select_pos = cursor_pos;
-    let mut deselect_pos = cursor_pos;
 
     event_loop.run_return(move |event, _, control_flow| {
         // Event handlers
         match event {
             Event::WindowEvent { event, .. } => match event {
+                WindowEvent::ModifiersChanged(state) => {
+                    if state.shift() {
+                        threshold_inc = 0.01;
+                    } else {
+                        threshold_inc = 0.001;
+                    }
+                }
                 WindowEvent::CloseRequested => {
                     *control_flow = ControlFlow::Exit;
                     return;
-                }
-                WindowEvent::CursorMoved { position, .. } => {
-                    cursor_pos = position.into();
-                }
-                WindowEvent::MouseInput { state, button, .. } => {
-                    if state == ElementState::Pressed {
-                        match button {
-                            MouseButton::Right => {
-                                deselect_pos = cursor_pos;
-                            }
-                            MouseButton::Left => {
-                                select_pos = cursor_pos;
-                            }
-                            _ => (),
-                        }
-                    }
                 }
                 WindowEvent::KeyboardInput { input, .. } => {
                     if input.state == ElementState::Pressed {
@@ -153,13 +139,13 @@ pub extern "C" fn test_window(
                                     flip_hue = !flip_hue;
                                 }
                                 VirtualKeyCode::Up => {
-                                    if 1.0 >= threshold + THRESHOLD_INC {
-                                        threshold += THRESHOLD_INC;
+                                    if 1.0 >= threshold + threshold_inc {
+                                        threshold += threshold_inc;
                                     }
                                 }
                                 VirtualKeyCode::Down => {
-                                    if threshold - THRESHOLD_INC > 0.0 {
-                                        threshold -= THRESHOLD_INC;
+                                    if threshold - threshold_inc > 0.0 {
+                                        threshold -= threshold_inc;
                                     }
                                 }
                                 _ => (),
@@ -214,15 +200,11 @@ pub extern "C" fn test_window(
             || data.to_vec() != last_data
             || last_flip_hue != flip_hue
             || last_threshold != threshold
-            || select_pos != (0, 0)
-            || deselect_pos != (0, 0)
         {
             last_tile_size = tile_size;
             last_data = data.to_vec();
             last_flip_hue = flip_hue;
             last_threshold = threshold;
-            select_pos = (0, 0);
-            deselect_pos = (0, 0);
             vertices.clear();
 
             // Store tiles by (x, y, entropy)
