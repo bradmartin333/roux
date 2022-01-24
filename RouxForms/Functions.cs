@@ -8,9 +8,9 @@ namespace RouxForms
         unsafe private static byte* DataPointer;
 
         [DllImport("roux.dll")]
-        unsafe private static extern uint test_window(uint len, byte* ptr, uint wid, uint hgt, uint x, uint y);
+        unsafe private static extern void test_window(uint len, byte* ptr, uint wid, uint hgt, uint x, uint y);
 
-        unsafe public static uint TestWindow(Bitmap bmp, SizeF size, int test)
+        unsafe public static void TestWindow(Bitmap bmp, SizeF size, int test)
         {
             // Predict size after red channel extraction
             Size bmpSize = bmp.Width % 12 == 0 ? bmp.Size : new Size(bmp.Width / 12 * 12, bmp.Height);
@@ -35,14 +35,12 @@ namespace RouxForms
                 fixed (byte* p = &data[0])
                 {
                     DataPointer = p;
-                    return test_window((uint)data.Length, p, (uint)bmp.Width, (uint)bmp.Height, 5, 5);
+                    test_window((uint)data.Length, p, (uint)bmp.Width, (uint)bmp.Height, 5, 5);
                 }
             }
             else // Update data
                 for (int i = 0; i < data.Length; i++)
                     DataPointer[i] = data[i];
-
-            return 0; // No form opened
         }
 
         [DllImport("roux.dll")]

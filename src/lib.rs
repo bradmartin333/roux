@@ -7,22 +7,21 @@ mod window;
 
 #[no_mangle]
 pub extern "C" fn test_window(
-    _size: u32,
-    _array_pointer: *const u8,
+    size: u32,
+    array_pointer: *const u8,
     wid: u32,
     hgt: u32,
     start_x: u32,
     start_y: u32,
-) -> u32 {
-    let mut tile_size: f32 = window::MIN_TILE_SIZE * 2.0;
+) {
     window::test(
+        size,
+        array_pointer,
         wid as f64,
         hgt as f64,
         start_x as f64,
         start_y as f64,
-        &mut tile_size,
     );
-    tile_size as u32
 }
 
 #[no_mangle]

@@ -25,7 +25,7 @@ namespace RouxForms
             if (TestEditPixels == 1)
             {
                 ToggleRd(false);
-                LabelMain.Text = $"{TestWindow(GetSelectedImage(), size, TestEditPixels)} pixels";
+                TestWindow(GetSelectedImage(), size, TestEditPixels);
                 ToggleRd(true);
                 TestEditPixels = 0;
             }   
