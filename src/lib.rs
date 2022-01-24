@@ -110,11 +110,16 @@ pub extern "C" fn test_window(
     let mut flip_hue = false;
     let mut threshold = 0.0;
 
+    // Mouse info
+    let mut cursor_pos: (i32, i32) = (0, 0);
+
     // Refresh parameters
     let mut last_tile_size: f32 = 0.0;
     let mut last_data: Vec<u8> = vec![];
     let mut last_flip_hue = flip_hue;
     let mut last_threshold = threshold;
+    let mut select_pos = cursor_pos;
+    let mut deselect_pos = cursor_pos;
 
     event_loop.run_return(move |event, _, control_flow| {
         // Event handlers
@@ -124,11 +129,22 @@ pub extern "C" fn test_window(
                     *control_flow = ControlFlow::Exit;
                     return;
                 }
-                WindowEvent::MouseInput { button, .. } => match button {
-                    MouseButton::Right => scale_factor = 1,
-                    MouseButton::Left => scale_factor = -1,
-                    _ => (),
-                },
+                WindowEvent::CursorMoved { position, .. } => {
+                    cursor_pos = position.into();
+                }
+                WindowEvent::MouseInput { state, button, .. } => {
+                    if state == ElementState::Pressed {
+                        match button {
+                            MouseButton::Right => {
+                                deselect_pos = cursor_pos;
+                            }
+                            MouseButton::Left => {
+                                select_pos = cursor_pos;
+                            }
+                            _ => (),
+                        }
+                    }
+                }
                 WindowEvent::KeyboardInput { input, .. } => {
                     if input.state == ElementState::Pressed {
                         match input.virtual_keycode {
@@ -138,12 +154,12 @@ pub extern "C" fn test_window(
                                 }
                                 VirtualKeyCode::Up => {
                                     if 1.0 >= threshold + THRESHOLD_INC {
-                                        threshold = threshold + THRESHOLD_INC;
+                                        threshold += THRESHOLD_INC;
                                     }
                                 }
                                 VirtualKeyCode::Down => {
                                     if threshold - THRESHOLD_INC > 0.0 {
-                                        threshold = threshold - THRESHOLD_INC;
+                                        threshold -= THRESHOLD_INC;
                                     }
                                 }
                                 _ => (),
@@ -198,11 +214,15 @@ pub extern "C" fn test_window(
             || data.to_vec() != last_data
             || last_flip_hue != flip_hue
             || last_threshold != threshold
+            || select_pos != (0, 0)
+            || deselect_pos != (0, 0)
         {
             last_tile_size = tile_size;
             last_data = data.to_vec();
             last_flip_hue = flip_hue;
             last_threshold = threshold;
+            select_pos = (0, 0);
+            deselect_pos = (0, 0);
             vertices.clear();
 
             // Store tiles by (x, y, entropy)
@@ -255,9 +275,7 @@ pub extern "C" fn test_window(
                 [2.0 / grid_size[0] as f32, 2.0 / grid_size[1] as f32];
 
             if flip_hue {
-                let hue_buffer = max_entropy;
-                max_entropy = min_entropy;
-                min_entropy = hue_buffer;
+                std::mem::swap(&mut max_entropy, &mut min_entropy);
             }
 
             for entropy in entropies {
