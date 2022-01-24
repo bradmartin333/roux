@@ -1,10 +1,39 @@
 #[macro_use]
 extern crate glium;
-
 use crate::glium::glutin::platform::run_return::EventLoopExtRunReturn;
 use glium::{glutin, Surface};
 
 const MIN_TILE_SIZE: f32 = 3.0;
+const VERTEX_SHADER: &str = r#"
+    #version 140
+    in vec2 pos;
+    in float score;
+    out vec3 vColor;
+    vec3 hsv2rgb(vec3 c)
+    {
+        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    }
+    void main() {
+        gl_Position = vec4(pos, 0.0, 1.0);
+        vColor = hsv2rgb(vec3(score, 1.0, 1.0));
+    }
+"#;
+const FRAG_SHADER: &str = r#"
+    #version 140
+    in vec3 vColor;
+    out vec3 color;
+    void main() {
+        color = vColor;
+    }
+"#;
+
+#[derive(Copy, Clone)]
+struct Vertex {
+    pos: [f32; 2],
+    score: f32,
+}
 
 #[no_mangle]
 pub extern "C" fn test_window(
@@ -24,15 +53,8 @@ pub extern "C" fn test_window(
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
-    #[derive(Copy, Clone)]
-    struct Vertex {
-        pos: [f32; 2],
-        score: f32,
-    }
-
     implement_vertex!(Vertex, pos, score);
     let mut vertices: Vec<Vertex> = vec![];
-
     fn new_shape(p: [f32; 2], size: [f32; 2], score: f32) -> Vec<Vertex> {
         vec![
             Vertex {
@@ -61,36 +83,7 @@ pub extern "C" fn test_window(
             },
         ]
     }
-
-    let vertex_shader_src = r#"
-        #version 140
-        in vec2 pos;
-        in float score;
-        out vec3 vColor;
-        vec3 hsv2rgb(vec3 c)
-        {
-            vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-            vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-            return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-        }
-        void main() {
-            gl_Position = vec4(pos, 0.0, 1.0);
-            vColor = hsv2rgb(vec3(score, 1.0, 1.0));
-        }
-    "#;
-
-    let fragment_shader_src = r#"
-        #version 140
-        in vec3 vColor;
-        out vec3 color;
-        void main() {
-            color = vColor;
-        }
-    "#;
-
-    let program =
-        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-            .unwrap();
+    let program = glium::Program::from_source(&display, VERTEX_SHADER, FRAG_SHADER, None).unwrap();
 
     let mut scale_factor: f32 = 1.0;
     let mut tile_size: f32 = MIN_TILE_SIZE;
@@ -103,31 +96,28 @@ pub extern "C" fn test_window(
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
                 }
-                glutin::event::WindowEvent::MouseInput { button, .. } => {
-                    match button {
-                        glutin::event::MouseButton::Right => scale_factor = 0.9,
-                        glutin::event::MouseButton::Left => scale_factor = 1.1,
-                        _ => return,
-                    }
-                    return;
-                }
-                _ => return,
+                glutin::event::WindowEvent::MouseInput { button, .. } => match button {
+                    glutin::event::MouseButton::Right => scale_factor = 0.9,
+                    glutin::event::MouseButton::Left => scale_factor = 1.1,
+                    _ => (),
+                },
+                _ => (),
             },
             glutin::event::Event::NewEvents(cause) => match cause {
                 glutin::event::StartCause::ResumeTimeReached { .. } => (),
                 glutin::event::StartCause::Init => (),
-                _ => return,
+                _ => (),
             },
             glutin::event::Event::DeviceEvent { event, .. } => match event {
                 glutin::event::DeviceEvent::MouseWheel { delta } => match delta {
                     glutin::event::MouseScrollDelta::LineDelta(_, s) => {
                         scale_factor = (((s as f64).signum() * 0.1) + 1.0) as f32;
                     }
-                    _ => return,
+                    _ => (),
                 },
-                _ => return,
+                _ => (),
             },
-            _ => return,
+            _ => (),
         }
 
         if scale_factor != 1.0 {
@@ -151,7 +141,6 @@ pub extern "C" fn test_window(
         ];
 
         let data = unsafe { std::slice::from_raw_parts(array_pointer, array_size as usize) };
-
         if tile_size != last_tile_size || data.to_vec() != last_data {
             last_tile_size = tile_size;
             last_data = data.to_vec();
