@@ -3,13 +3,17 @@ extern crate glium;
 use glium::{
     glutin::{
         dpi::{LogicalPosition, LogicalSize},
-        event::{DeviceEvent, Event, MouseButton, MouseScrollDelta, StartCause, WindowEvent},
+        event::{
+            DeviceEvent, ElementState, Event, MouseButton, MouseScrollDelta, StartCause,
+            VirtualKeyCode, WindowEvent,
+        },
         event_loop::{ControlFlow, EventLoop},
         platform::run_return::EventLoopExtRunReturn,
     },
     Surface,
 };
 
+const THRESHOLD_INC: f64 = 0.01;
 const TILE_SIZE: f32 = 3.0;
 const VERTEX_SHADER: &str = r#"
     #version 140
@@ -18,9 +22,13 @@ const VERTEX_SHADER: &str = r#"
     out vec3 vColor;
     vec3 hsv2rgb(vec3 c)
     {
-        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+        if (c.x > 0.0) {
+            vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+            vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+            return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+        } else {
+            return vec3(0.0);
+        }
     }
     void main() {
         gl_Position = vec4(pos, 0.0, 1.0);
@@ -98,9 +106,15 @@ pub extern "C" fn test_window(
     let mut scale_factor: i32 = 0;
     let mut tile_size: f32 = TILE_SIZE * 3.0;
 
+    // Scoring parameters
+    let mut flip_hue = false;
+    let mut threshold = 0.0;
+
     // Refresh parameters
     let mut last_tile_size: f32 = 0.0;
     let mut last_data: Vec<u8> = vec![];
+    let mut last_flip_hue = flip_hue;
+    let mut last_threshold = threshold;
 
     event_loop.run_return(move |event, _, control_flow| {
         // Event handlers
@@ -115,6 +129,29 @@ pub extern "C" fn test_window(
                     MouseButton::Left => scale_factor = -1,
                     _ => (),
                 },
+                WindowEvent::KeyboardInput { input, .. } => {
+                    if input.state == ElementState::Pressed {
+                        match input.virtual_keycode {
+                            Some(keycode) => match keycode {
+                                VirtualKeyCode::A => {
+                                    flip_hue = !flip_hue;
+                                }
+                                VirtualKeyCode::Up => {
+                                    if 1.0 >= threshold + THRESHOLD_INC {
+                                        threshold = threshold + THRESHOLD_INC;
+                                    }
+                                }
+                                VirtualKeyCode::Down => {
+                                    if threshold - THRESHOLD_INC > 0.0 {
+                                        threshold = threshold - THRESHOLD_INC;
+                                    }
+                                }
+                                _ => (),
+                            },
+                            None => (),
+                        }
+                    }
+                }
                 _ => (),
             },
             Event::NewEvents(cause) => match cause {
@@ -155,10 +192,17 @@ pub extern "C" fn test_window(
         // Read image from heap
         let data = unsafe { std::slice::from_raw_parts(array_pointer, array_size as usize) };
 
-        // Rebuild shaders if new data or grid size
-        if tile_size != last_tile_size || data.to_vec() != last_data {
+        // todo: raise an event for these instead of checking last state
+        // Rebuild shaders if new data, grid size or scoring params
+        if tile_size != last_tile_size
+            || data.to_vec() != last_data
+            || last_flip_hue != flip_hue
+            || last_threshold != threshold
+        {
             last_tile_size = tile_size;
             last_data = data.to_vec();
+            last_flip_hue = flip_hue;
+            last_threshold = threshold;
             vertices.clear();
 
             // Store tiles by (x, y, entropy)
@@ -210,14 +254,27 @@ pub extern "C" fn test_window(
             let virtual_tile_size: [f32; 2] =
                 [2.0 / grid_size[0] as f32, 2.0 / grid_size[1] as f32];
 
+            if flip_hue {
+                let hue_buffer = max_entropy;
+                max_entropy = min_entropy;
+                min_entropy = hue_buffer;
+            }
+
             for entropy in entropies {
                 let row = (entropy.1 as f32 * virtual_tile_size[1]) - 1.0;
                 let col = (entropy.0 as f32 * virtual_tile_size[0]) - 1.0;
                 let mapped = (entropy.2 - min_entropy) * 1.0 / (max_entropy - min_entropy);
+                let hue_val = {
+                    if mapped >= threshold {
+                        mapped
+                    } else {
+                        0.0
+                    }
+                };
                 vertices.append(&mut new_shape(
                     [col, row],
                     [virtual_tile_size[0], virtual_tile_size[1]],
-                    mapped as f32,
+                    hue_val as f32,
                 ));
             }
 
