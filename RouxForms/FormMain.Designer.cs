@@ -33,6 +33,7 @@
             this.BtnTestWindow = new System.Windows.Forms.Button();
             this.RdTower = new System.Windows.Forms.RadioButton();
             this.RdTall = new System.Windows.Forms.RadioButton();
+            this.RdChip = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // RdCar
@@ -61,7 +62,7 @@
             // 
             // BtnTestWindow
             // 
-            this.BtnTestWindow.Location = new System.Drawing.Point(14, 115);
+            this.BtnTestWindow.Location = new System.Drawing.Point(13, 138);
             this.BtnTestWindow.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnTestWindow.Name = "BtnTestWindow";
             this.BtnTestWindow.Size = new System.Drawing.Size(88, 27);
@@ -92,11 +93,23 @@
             this.RdTall.Text = "Tall";
             this.RdTall.UseVisualStyleBackColor = true;
             // 
+            // RdChip
+            // 
+            this.RdChip.AutoSize = true;
+            this.RdChip.Location = new System.Drawing.Point(35, 113);
+            this.RdChip.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.RdChip.Name = "RdChip";
+            this.RdChip.Size = new System.Drawing.Size(50, 19);
+            this.RdChip.TabIndex = 7;
+            this.RdChip.Text = "Chip";
+            this.RdChip.UseVisualStyleBackColor = true;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(122, 154);
+            this.ClientSize = new System.Drawing.Size(120, 178);
+            this.Controls.Add(this.RdChip);
             this.Controls.Add(this.RdTall);
             this.Controls.Add(this.RdTower);
             this.Controls.Add(this.BtnTestWindow);
@@ -117,6 +130,7 @@
         private Button BtnTestWindow;
         private RadioButton RdTower;
         private RadioButton RdTall;
+        private RadioButton RdChip;
     }
 }
 

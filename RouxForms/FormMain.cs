@@ -35,8 +35,10 @@ namespace RouxForms
                 return Properties.Resources.cube;
             else if (RdTower.Checked)
                 return Properties.Resources.tower;
-            else
+            else if (RdTall.Checked)
                 return Properties.Resources.tall;
+            else
+                return Properties.Resources.chip;
         }
 
         private void ToggleRd(bool enable)
