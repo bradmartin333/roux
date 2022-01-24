@@ -4,8 +4,15 @@ extern crate glium;
 mod window;
 
 #[no_mangle]
-pub unsafe extern "C" fn test_window(_size: u32, _array_pointer: *const u8, wid: u32, hgt: u32) {
-    window::test(wid as f64, hgt as f64);
+pub unsafe extern "C" fn test_window(
+    _size: u32,
+    _array_pointer: *const u8,
+    wid: u32,
+    hgt: u32,
+    start_x: u32,
+    start_y: u32,
+) {
+    window::test(wid as f64, hgt as f64, start_x as f64, start_y as f64);
 }
 
 #[no_mangle]

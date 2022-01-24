@@ -1,11 +1,15 @@
+use crate::glium::glutin::platform::run_return::EventLoopExtRunReturn;
 use glium::{glutin, Surface};
 
 const MIN_TILE_SIZE: f32 = 5.0;
 
-pub fn test(wid: f64, hgt: f64) {
-    let event_loop = glutin::event_loop::EventLoop::new();
+pub fn test(wid: f64, hgt: f64, start_x: f64, start_y: f64) {
+    let mut event_loop = glutin::event_loop::EventLoop::new();
     let size = glutin::dpi::LogicalSize::new(wid, hgt);
-    let wb = glutin::window::WindowBuilder::new().with_inner_size(size);
+    let start_pos = glutin::dpi::LogicalPosition::new(start_x, start_y);
+    let wb = glutin::window::WindowBuilder::new()
+        .with_inner_size(size)
+        .with_position(start_pos);
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
@@ -80,7 +84,7 @@ pub fn test(wid: f64, hgt: f64) {
     let mut t: f32 = 0.0;
     let mut tile_size: f32 = MIN_TILE_SIZE;
     let mut scale_factor: f32 = 1.0;
-    event_loop.run(move |event, _, control_flow| {
+    event_loop.run_return(move |event, _, control_flow| {
         match event {
             glutin::event::Event::WindowEvent { event, .. } => match event {
                 glutin::event::WindowEvent::CloseRequested => {

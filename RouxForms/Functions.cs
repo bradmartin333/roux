@@ -8,7 +8,7 @@ namespace RouxForms
         unsafe private static byte* DataPointer;
 
         [DllImport("roux.dll")]
-        unsafe private static extern uint test_window(uint len, byte* ptr, int wid, int hgt, int x, int y);
+        unsafe private static extern uint test_window(uint len, byte* ptr, uint wid, uint hgt, uint x, uint y);
 
         unsafe public static uint TestWindow(Bitmap bmp, SizeF size, int test)
         {
@@ -35,7 +35,7 @@ namespace RouxForms
                 fixed (byte* p = &data[0])
                 {
                     DataPointer = p;
-                    return test_window((uint)data.Length, p, bmp.Width, bmp.Height, 5, 5);
+                    return test_window((uint)data.Length, p, (uint)bmp.Width, (uint)bmp.Height, 5, 5);
                 }
             }
             else // Update data
