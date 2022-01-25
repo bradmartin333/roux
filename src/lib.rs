@@ -21,13 +21,15 @@ const VERTEX_SHADER: &str = r#"
     out vec3 vColor;
     vec3 hsv2rgb(vec3 c)
     {
+        if (c.x > 0.9) {
+            return vec3(1.0);
+        } 
         if (c.x > 0.0) {
             vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
             vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
             return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-        } else {
-            return vec3(0.0);
         }
+        return vec3(0.0);
     }
     void main() {
         gl_Position = vec4(pos, 0.0, 1.0);
@@ -106,9 +108,10 @@ pub extern "C" fn test_window(
     let mut tile_size: f32 = TILE_SIZE * 3.0;
 
     // Scoring parameters
+    // Only using the upper 1/3 of the color wheel
     let mut flip_hue = false;
     let mut threshold_inc: f64 = 0.001;
-    let mut threshold = 0.0;
+    let mut threshold = 2.0 / 3.0;
 
     // Refresh parameters
     let mut last_tile_size: f32 = 0.0;
@@ -263,7 +266,8 @@ pub extern "C" fn test_window(
             for entropy in entropies {
                 let row = (entropy.1 as f32 * virtual_tile_size[1]) - 1.0;
                 let col = (entropy.0 as f32 * virtual_tile_size[0]) - 1.0;
-                let mapped = (entropy.2 - min_entropy) * 1.0 / (max_entropy - min_entropy);
+                let mapped = (entropy.2 - min_entropy) * (1.0 / 3.0) / (max_entropy - min_entropy)
+                    + (2.0 / 3.0);
                 let hue_val = {
                     if mapped >= threshold {
                         mapped
