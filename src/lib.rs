@@ -83,6 +83,17 @@ fn new_shape(p: [f32; 2], size: [f32; 2], score: f32) -> Vec<Vertex> {
     ]
 }
 
+fn float_to_char(f: f32) -> String {
+    let mut s = String::default();
+    if 0.0 > f {
+        s.push_str("~");
+    }
+    // Increment char past CR = Dec 13
+    let u: u8 = (f.abs() * 100.0).round() as u8 + 14;
+    s.push_str(&format!("{}", u as char));
+    s
+}
+
 #[no_mangle]
 pub extern "C" fn test_window(
     array_size: u32,
@@ -105,13 +116,12 @@ pub extern "C" fn test_window(
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     // Output
-    let mut path: String = String::default();
-    unsafe {
-        path = CStr::from_ptr(path_pointer)
+    let path: String = unsafe {
+        CStr::from_ptr(path_pointer)
             .to_str()
             .expect("Can not read string argument.")
-            .to_string();
-    }
+            .to_string()
+    };
     if !std::path::Path::new(&path).is_file() && path != String::default() {
         if let Err(e) = std::fs::File::create(&path) {
             println!("Couldn't create {}: {}", path, e);
@@ -181,7 +191,18 @@ pub extern "C" fn test_window(
                                             Err(err) => panic!("Couldn't open {}: {}", path, err),
                                             Ok(file) => file,
                                         };
-                                        if let Err(e) = writeln!(file, "A new line!") {
+                                        let mut output_str = String::default();
+                                        for i in (0..vertices.len()).step_by(6) {
+                                            let v: Vertex = vertices[i];
+                                            if v.score != 0.0 {
+                                                output_str.push_str(&format!(
+                                                    "{}{}",
+                                                    float_to_char(v.pos[0]),
+                                                    float_to_char(v.pos[1])
+                                                ));
+                                            }
+                                        }
+                                        if let Err(e) = writeln!(file, "{}", output_str) {
                                             println!("Couldn't write to {}: {}", path, e);
                                         }
                                     }

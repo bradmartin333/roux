@@ -19,16 +19,7 @@ namespace RouxForms
             Size bmpSize = bmp.Width % 12 == 0 ? bmp.Size : new Size(bmp.Width / 12 * 12, bmp.Height);
 
             // Resize bitmap to fit a single screen
-            if (bmpSize.Width <= bmpSize.Height)
-                if (bmpSize.Height < size.Height)
-                    bmp = new Bitmap((Bitmap)bmp.Clone());
-                else
-                    bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)(bmpSize.Width / (bmpSize.Height / size.Height)), (int)size.Height));
-            else
-                if (bmpSize.Width < size.Width)
-                    bmp = new Bitmap((Bitmap)bmp.Clone());
-                else
-                    bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)size.Width, (int)(bmpSize.Height / (bmpSize.Width / size.Width))));
+            bmp = new Bitmap((Bitmap)bmp.Clone(), new Size((int)(bmpSize.Width / (bmpSize.Height / size.Height)), (int)size.Height));
 
             // Extract red channel and resize to the predicted size
             byte[] data = GetRedChannelArr(ref bmp);

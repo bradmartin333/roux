@@ -4,66 +4,44 @@ namespace RouxForms
 {
     public partial class FormMain : Form
     {
-        private readonly string CustomDir = @"C:\Users\delta\Desktop\pix\";
-        private string[] CustomPics = Array.Empty<string>();
-        private int CustomIter = 0;
+        private readonly string Dir = @"C:\Users\delta\Desktop\pix\";
+        private string[] Pics = Array.Empty<string>();
+        private int Iter = 0;
+        private SizeF WindowSize = SizeF.Empty;
 
         public FormMain()
         {
             InitializeComponent();
-            if (Directory.Exists(CustomDir))
+            if (Directory.Exists(Dir))
             {
-                CustomPics = Directory.GetFiles(CustomDir);
-                if (CustomPics.Length >= 2) BtnIterCustom.Enabled = true;
+                Pics = Directory.GetFiles(Dir);
+                if (Pics.Length >= 2) BtnIterCustom.Enabled = true;
             }
+            Rectangle bounds = Screen.FromControl(this).Bounds;
+            WindowSize = new((int)(bounds.Width * 0.9), (int)(bounds.Height * 0.9));
         }
-
         private void BtnTestWindow_Click(object sender, EventArgs e)
         {
-            Rectangle bounds = Screen.FromControl(this).Bounds;
-            SizeF size = new((int)(bounds.Width * 0.9), (int)(bounds.Height * 0.9));
-            ToggleRd(false);
-            TestWindow(GetSelectedImage(), size, initialImage: true);
-            ToggleRd(true);
-        }
-
-        private Bitmap GetSelectedImage()
-        {
-            if (RdCar.Checked)
-                return Properties.Resources.car;
-            else if (RdCube.Checked)
-                return Properties.Resources.cube;
-            else if (RdTower.Checked)
-                return Properties.Resources.tower;
-            else if (RdTall.Checked)
-                return Properties.Resources.tall;
-            else
-                return Properties.Resources.chip;
-        }
-
-        private void ToggleRd(bool enable)
-        {
-            foreach (RadioButton rd in Controls.OfType<RadioButton>())
-                rd.Enabled = enable;
+            BtnIterCustom.Enabled = false;
+            BtnTestWindow.Enabled = false;
+            TestWindow(Properties.Resources.cube, WindowSize, initialImage: true);
+            BtnIterCustom.Enabled = true;
+            BtnTestWindow.Enabled = true;
         }
 
         private void BtnIterCustom_Click(object sender, EventArgs e)
         {
-            CustomIter++;
-            if (CustomIter > CustomPics.Length - 1) CustomIter = 2;
-            Bitmap bmp = new(CustomPics[CustomIter]);
-            Rectangle bounds = Screen.FromControl(this).Bounds;
-            SizeF size = new((int)(bounds.Width * 0.9), (int)(bounds.Height * 0.9));
-            if (CustomIter == 1)
+            Iter++;
+            if (Iter > Pics.Length - 1) Iter = 2;
+            if (Iter == 1)
             {
-                ToggleRd(false);
                 BtnTestWindow.Enabled = false;
-                TestWindow(bmp, size, initialImage: true);
-                ToggleRd(true);
+                TestWindow(new(Pics[Iter]), WindowSize, initialImage: true);
                 BtnTestWindow.Enabled = true;
+                Iter = 0;
             }
             else
-                TestWindow(bmp, size);
+                TestWindow(new(Pics[Iter]), WindowSize);
         }
     }
 }
