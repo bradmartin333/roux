@@ -12,6 +12,9 @@ use glium::{
     },
     Surface,
 };
+use libc::c_char;
+use std::ffi::CStr;
+use std::io::Write;
 
 const TILE_SIZE: f32 = 3.0;
 const VERTEX_SHADER: &str = r#"
@@ -51,6 +54,35 @@ struct Vertex {
     score: f32,
 }
 
+fn new_shape(p: [f32; 2], size: [f32; 2], score: f32) -> Vec<Vertex> {
+    vec![
+        Vertex {
+            pos: [p[0], p[1]],
+            score,
+        },
+        Vertex {
+            pos: [p[0], p[1] + size[1]],
+            score,
+        },
+        Vertex {
+            pos: [p[0] + size[0], p[1]],
+            score,
+        },
+        Vertex {
+            pos: [p[0] + size[0], p[1] + size[1]],
+            score,
+        },
+        Vertex {
+            pos: [p[0], p[1] + size[1]],
+            score,
+        },
+        Vertex {
+            pos: [p[0] + size[0], p[1]],
+            score,
+        },
+    ]
+}
+
 #[no_mangle]
 pub extern "C" fn test_window(
     array_size: u32,
@@ -59,6 +91,7 @@ pub extern "C" fn test_window(
     hgt: u32,
     start_x: u32,
     start_y: u32,
+    path_pointer: *const c_char,
 ) {
     // Window
     let mut event_loop = EventLoop::new();
@@ -66,41 +99,28 @@ pub extern "C" fn test_window(
     let start_pos = LogicalPosition::new(start_x, start_y);
     let wb = glium::glutin::window::WindowBuilder::new()
         .with_inner_size(size)
+        .with_resizable(false)
         .with_position(start_pos);
     let cb = glium::glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
+    // Output
+    let mut path: String = String::default();
+    unsafe {
+        path = CStr::from_ptr(path_pointer)
+            .to_str()
+            .expect("Can not read string argument.")
+            .to_string();
+    }
+    if !std::path::Path::new(&path).is_file() && path != String::default() {
+        if let Err(e) = std::fs::File::create(&path) {
+            println!("Couldn't create {}: {}", path, e);
+        }
+    }
+
     // Shader
     implement_vertex!(Vertex, pos, score);
     let mut vertices: Vec<Vertex> = vec![];
-    fn new_shape(p: [f32; 2], size: [f32; 2], score: f32) -> Vec<Vertex> {
-        vec![
-            Vertex {
-                pos: [p[0], p[1]],
-                score,
-            },
-            Vertex {
-                pos: [p[0], p[1] + size[1]],
-                score,
-            },
-            Vertex {
-                pos: [p[0] + size[0], p[1]],
-                score,
-            },
-            Vertex {
-                pos: [p[0] + size[0], p[1] + size[1]],
-                score,
-            },
-            Vertex {
-                pos: [p[0], p[1] + size[1]],
-                score,
-            },
-            Vertex {
-                pos: [p[0] + size[0], p[1]],
-                score,
-            },
-        ]
-    }
     let program = glium::Program::from_source(&display, VERTEX_SHADER, FRAG_SHADER, None).unwrap();
 
     // Grid parameters
@@ -149,6 +169,21 @@ pub extern "C" fn test_window(
                                 VirtualKeyCode::Down => {
                                     if threshold - threshold_inc > 0.0 {
                                         threshold -= threshold_inc;
+                                    }
+                                }
+                                VirtualKeyCode::S => {
+                                    if std::path::Path::new(&path).is_file() {
+                                        let mut file = match std::fs::OpenOptions::new()
+                                            .write(true)
+                                            .append(true)
+                                            .open(&path)
+                                        {
+                                            Err(err) => panic!("Couldn't open {}: {}", path, err),
+                                            Ok(file) => file,
+                                        };
+                                        if let Err(e) = writeln!(file, "A new line!") {
+                                            println!("Couldn't write to {}: {}", path, e);
+                                        }
                                     }
                                 }
                                 _ => (),

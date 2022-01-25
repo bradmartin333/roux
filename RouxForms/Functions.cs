@@ -5,10 +5,13 @@ namespace RouxForms
 {
     public class Functions
     {
+        private static readonly string TestPath = @"C:\Users\delta\Desktop\out.txt";
+
         unsafe private static byte* DataPointer;
 
         [DllImport("roux.dll")]
-        unsafe private static extern void test_window(uint len, byte* ptr, uint wid, uint hgt, uint x, uint y);
+        unsafe private static extern void test_window(uint len, byte* ptr, uint wid, uint hgt, uint x, uint y, 
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8Text);
 
         unsafe public static void TestWindow(Bitmap bmp, SizeF size, bool initialImage = false)
         {
@@ -35,7 +38,7 @@ namespace RouxForms
                 fixed (byte* p = &data[0])
                 {
                     DataPointer = p;
-                    test_window((uint)data.Length, p, (uint)bmp.Width, (uint)bmp.Height, 5, 5);
+                    test_window((uint)data.Length, p, (uint)bmp.Width, (uint)bmp.Height, 5, 5, TestPath);
                 }
             }
             else // Update data
