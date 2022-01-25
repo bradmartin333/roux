@@ -34,13 +34,14 @@
             this.RdTower = new System.Windows.Forms.RadioButton();
             this.RdTall = new System.Windows.Forms.RadioButton();
             this.RdChip = new System.Windows.Forms.RadioButton();
+            this.BtnIterCustom = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // RdCar
             // 
             this.RdCar.AutoSize = true;
             this.RdCar.Checked = true;
-            this.RdCar.Location = new System.Drawing.Point(35, 12);
+            this.RdCar.Location = new System.Drawing.Point(74, 13);
             this.RdCar.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.RdCar.Name = "RdCar";
             this.RdCar.Size = new System.Drawing.Size(43, 19);
@@ -52,7 +53,7 @@
             // RdCube
             // 
             this.RdCube.AutoSize = true;
-            this.RdCube.Location = new System.Drawing.Point(35, 38);
+            this.RdCube.Location = new System.Drawing.Point(74, 39);
             this.RdCube.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.RdCube.Name = "RdCube";
             this.RdCube.Size = new System.Drawing.Size(53, 19);
@@ -62,7 +63,7 @@
             // 
             // BtnTestWindow
             // 
-            this.BtnTestWindow.Location = new System.Drawing.Point(13, 138);
+            this.BtnTestWindow.Location = new System.Drawing.Point(52, 139);
             this.BtnTestWindow.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnTestWindow.Name = "BtnTestWindow";
             this.BtnTestWindow.Size = new System.Drawing.Size(88, 27);
@@ -74,7 +75,7 @@
             // RdTower
             // 
             this.RdTower.AutoSize = true;
-            this.RdTower.Location = new System.Drawing.Point(35, 63);
+            this.RdTower.Location = new System.Drawing.Point(74, 64);
             this.RdTower.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.RdTower.Name = "RdTower";
             this.RdTower.Size = new System.Drawing.Size(56, 19);
@@ -85,7 +86,7 @@
             // RdTall
             // 
             this.RdTall.AutoSize = true;
-            this.RdTall.Location = new System.Drawing.Point(35, 88);
+            this.RdTall.Location = new System.Drawing.Point(74, 89);
             this.RdTall.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.RdTall.Name = "RdTall";
             this.RdTall.Size = new System.Drawing.Size(42, 19);
@@ -96,7 +97,7 @@
             // RdChip
             // 
             this.RdChip.AutoSize = true;
-            this.RdChip.Location = new System.Drawing.Point(35, 113);
+            this.RdChip.Location = new System.Drawing.Point(74, 114);
             this.RdChip.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.RdChip.Name = "RdChip";
             this.RdChip.Size = new System.Drawing.Size(50, 19);
@@ -104,11 +105,24 @@
             this.RdChip.Text = "Chip";
             this.RdChip.UseVisualStyleBackColor = true;
             // 
+            // BtnIterCustom
+            // 
+            this.BtnIterCustom.Enabled = false;
+            this.BtnIterCustom.Location = new System.Drawing.Point(52, 172);
+            this.BtnIterCustom.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.BtnIterCustom.Name = "BtnIterCustom";
+            this.BtnIterCustom.Size = new System.Drawing.Size(88, 27);
+            this.BtnIterCustom.TabIndex = 8;
+            this.BtnIterCustom.Text = "Iter Custom";
+            this.BtnIterCustom.UseVisualStyleBackColor = true;
+            this.BtnIterCustom.Click += new System.EventHandler(this.BtnIterCustom_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(120, 178);
+            this.ClientSize = new System.Drawing.Size(194, 211);
+            this.Controls.Add(this.BtnIterCustom);
             this.Controls.Add(this.RdChip);
             this.Controls.Add(this.RdTall);
             this.Controls.Add(this.RdTower);
@@ -131,6 +145,7 @@
         private RadioButton RdTower;
         private RadioButton RdTall;
         private RadioButton RdChip;
+        private Button BtnIterCustom;
     }
 }
 
